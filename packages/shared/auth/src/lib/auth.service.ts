@@ -41,8 +41,6 @@ export interface NeonAuthClient {
   getSession(): Promise<
     Result<{ user: { id: string; email: string; name?: string | null } }>
   >;
-  /** Short-lived JWT (EdDSA, ~15 min) for calling our own API. */
-  token(): Promise<Result<{ token: string }>>;
 }
 
 export const NEON_AUTH_CLIENT = new InjectionToken<NeonAuthClient>(
@@ -56,11 +54,24 @@ export const NEON_AUTH_CLIENT = new InjectionToken<NeonAuthClient>(
   },
 );
 
+/**
+ * `fetch` used for the JWT endpoint. The SDK client's `token()` can answer
+ * from its session cache once `getSession()` has run and then returns the
+ * session payload instead of a JWT, so the token is requested directly.
+ * Injectable so tests can stub it.
+ */
+export const AUTH_FETCH = new InjectionToken<typeof fetch>('AUTH_FETCH', {
+  providedIn: 'root',
+  factory: () => globalThis.fetch.bind(globalThis),
+});
+
 export class AuthError extends Error {}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly options = inject(NEON_AUTH_OPTIONS);
   private readonly client = inject(NEON_AUTH_CLIENT);
+  private readonly fetch = inject(AUTH_FETCH);
 
   private readonly currentUser = signal<AuthUser | null>(null);
   private readonly currentStatus = signal<AuthStatus>('loading');
@@ -111,11 +122,18 @@ export class AuthService {
   }
 
   /**
-   * A JWT for our own API, verified server-side against Neon Auth's JWKS,
-   * so the API never needs the session cookie. `null` when signed out.
+   * A short-lived JWT (EdDSA, ~15 min) for our own API, verified server-side
+   * against Neon Auth's JWKS so the API never needs the session cookie.
+   * `null` when signed out.
    */
   async getToken(): Promise<string | null> {
-    const { data } = await this.client.token();
-    return data?.token ?? null;
+    const response = await this.fetch(`${this.options.url}/token`, {
+      credentials: 'include',
+    });
+    if (!response.ok) return null;
+    const body = (await response.json().catch(() => null)) as {
+      token?: string;
+    } | null;
+    return body?.token ?? null;
   }
 }

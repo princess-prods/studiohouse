@@ -1,10 +1,18 @@
 import { PGlite } from '@electric-sql/pglite';
-import { Database, brands, memberships, studios, users } from '@studiohouse/db';
+import {
+  Database,
+  brands,
+  colorThemes,
+  memberships,
+  studios,
+  themeColors,
+  users,
+} from '@studiohouse/db';
 import { drizzle } from 'drizzle-orm/pglite';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { getMe } from './me';
+import { getMe, loadBrands } from './me';
 import { VerifiedUser } from './verify-token';
 
 /**
@@ -22,7 +30,7 @@ let studioId: string;
 
 const owner: VerifiedUser = {
   id: 'auth_owner',
-  email: 'owner@studiohouse.test',
+  email: 'owner@example.test',
   name: 'Owner',
 };
 const stranger: VerifiedUser = {
@@ -30,6 +38,14 @@ const stranger: VerifiedUser = {
   email: 'someone@else.test',
   name: null,
 };
+
+const PALETTE = [
+  ['primary', '#2563EB'],
+  ['ink', '#0F172A'],
+  ['paper', '#F8FAFC'],
+  ['secondary', '#7C3AED'],
+  ['tint', '#CBD5E1'],
+] as const;
 
 beforeAll(async () => {
   pg = new PGlite();
@@ -51,16 +67,30 @@ afterAll(async () => {
 beforeEach(async () => {
   await db.delete(memberships);
   await db.delete(brands);
+  await db.delete(themeColors);
+  await db.delete(colorThemes);
   await db.delete(users);
   await db.delete(studios);
   const [studio] = await db
     .insert(studios)
-    .values({ slug: 'princess-productions', name: 'Princess Productions' })
+    .values({ slug: 'demo-studio', name: 'Demo Studio' })
     .returning();
   studioId = studio.id;
+  const [theme] = await db
+    .insert(colorThemes)
+    .values({ studioId, slug: 'demo-brand', name: 'Demo Brand' })
+    .returning();
+  await db.insert(themeColors).values(
+    PALETTE.map(([role, hex]) => ({
+      themeId: theme.id,
+      role,
+      name: role,
+      hex,
+    })),
+  );
   await db.insert(brands).values([
-    { studioId, slug: 'devinella', name: 'Devinella' },
-    { studioId, slug: 'princess-productions', name: 'Princess Productions' },
+    { studioId, slug: 'brand-two', name: 'Brand Two', themeId: theme.id },
+    { studioId, slug: 'brand-one', name: 'Brand One', themeId: theme.id },
   ]);
 });
 
@@ -80,21 +110,37 @@ describe('getMe', () => {
 
   it('bootstraps the configured owner into the studio on first sign-in', async () => {
     const result = await getMe(db, owner, {
-      bootstrapOwnerEmail: 'OWNER@studiohouse.test',
+      bootstrapOwnerEmail: 'OWNER@example.test',
+      bootstrapStudioSlug: 'demo-studio',
     });
     expect(result.memberships).toHaveLength(1);
     const [m] = result.memberships;
     expect(m.role).toBe('owner');
-    expect(m.studio).toMatchObject({ slug: 'princess-productions' });
-    expect(m.brands.map((b) => b.slug)).toEqual([
-      'devinella',
-      'princess-productions',
+    expect(m.studio).toMatchObject({ slug: 'demo-studio' });
+    expect(m.brands.map((b) => b.slug)).toEqual(['brand-one', 'brand-two']);
+  });
+
+  it('returns each brand with its assembled theme', async () => {
+    const result = await getMe(db, owner, {
+      bootstrapOwnerEmail: owner.email,
+      bootstrapStudioSlug: 'demo-studio',
+    });
+    const [brand] = result.memberships[0].brands;
+    expect(brand.theme).toMatchObject({ id: 'demo-brand', name: 'Demo Brand' });
+    expect(brand.theme?.colors.primary.hex).toBe('#2563EB');
+    expect(Object.keys(brand.theme?.colors ?? {}).sort()).toEqual([
+      'ink',
+      'paper',
+      'primary',
+      'secondary',
+      'tint',
     ]);
   });
 
-  it('does not bootstrap other emails or a missing studio', async () => {
+  it('does not bootstrap other emails, a missing studio, or without a slug', async () => {
     const other = await getMe(db, stranger, {
       bootstrapOwnerEmail: owner.email,
+      bootstrapStudioSlug: 'demo-studio',
     });
     expect(other.memberships).toEqual([]);
     const missing = await getMe(db, owner, {
@@ -102,10 +148,15 @@ describe('getMe', () => {
       bootstrapStudioSlug: 'no-such-studio',
     });
     expect(missing.memberships).toEqual([]);
+    const noSlug = await getMe(db, owner, { bootstrapOwnerEmail: owner.email });
+    expect(noSlug.memberships).toEqual([]);
   });
 
   it('returns existing memberships and refreshes the profile', async () => {
-    await getMe(db, owner, { bootstrapOwnerEmail: owner.email });
+    await getMe(db, owner, {
+      bootstrapOwnerEmail: owner.email,
+      bootstrapStudioSlug: 'demo-studio',
+    });
     const renamed = { ...owner, name: 'Renamed' };
     const result = await getMe(db, renamed);
     expect(result.memberships[0].role).toBe('owner');
@@ -113,5 +164,37 @@ describe('getMe', () => {
     expect(row.displayName).toBe('Renamed');
     const all = await db.select().from(memberships);
     expect(all).toHaveLength(1);
+  });
+});
+
+describe('loadBrands', () => {
+  it('returns null themes for brands without one or with an incomplete one', async () => {
+    const [partial] = await db
+      .insert(colorThemes)
+      .values({ studioId, slug: 'partial', name: 'Partial' })
+      .returning();
+    await db.insert(themeColors).values({
+      themeId: partial.id,
+      role: 'primary',
+      name: 'Only one',
+      hex: '#000000',
+    });
+    await db.insert(brands).values([
+      { studioId, slug: 'bare', name: 'Bare' },
+      { studioId, slug: 'half', name: 'Half', themeId: partial.id },
+    ]);
+    const result = await loadBrands(db, studioId);
+    const bySlug = Object.fromEntries(result.map((b) => [b.slug, b.theme]));
+    expect(bySlug['bare']).toBeNull();
+    expect(bySlug['half']).toBeNull();
+    expect(bySlug['brand-one']?.id).toBe('demo-brand');
+  });
+
+  it('returns an empty list for a studio with no brands', async () => {
+    const [empty] = await db
+      .insert(studios)
+      .values({ slug: 'empty', name: 'Empty' })
+      .returning();
+    expect(await loadBrands(db, empty.id)).toEqual([]);
   });
 });

@@ -32,6 +32,7 @@ export default defineConfig(() => ({
         'src/index.ts',
         'src/main.ts',
         'src/environments/**',
+        'src/**/testing/**', // test fixtures, not app code
       ],
     },
   },

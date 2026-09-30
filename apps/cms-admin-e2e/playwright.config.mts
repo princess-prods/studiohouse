@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
+import { config as loadEnv } from 'dotenv';
 
 // For CI, you may want to set BASE_URL to the deployed application.
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
@@ -9,7 +10,8 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// import 'dotenv/config';
+// Local test credentials for the signed-in flow (E2E_OWNER_*); absent in CI.
+loadEnv({ path: '.env.local', quiet: true });
 
 /**
  * See https://playwright.dev/docs/test-configuration.

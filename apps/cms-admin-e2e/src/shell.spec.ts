@@ -65,9 +65,7 @@ test.describe('signed in', () => {
     for (const label of ['Dashboard', 'Brands', 'Content', 'Talent']) {
       await expect(nav.getByText(label, { exact: true })).toBeVisible();
     }
-    await expect(
-      page.locator('article[data-theme="princess-productions"]'),
-    ).toHaveCount(2);
+    await expect(page.locator('article[data-theme]').first()).toBeVisible();
   });
 
   test('keeps the session across a reload and signs out', async ({ page }) => {

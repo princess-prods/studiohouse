@@ -15,8 +15,8 @@ import {
 /*
  * Tenancy model
  * -------------
- * studio      the tenant; the highest unit of organisation (e.g. Princess Productions)
- * brand       a consumer-facing identity owned by a studio (e.g. Devinella)
+ * studio      the tenant; the highest unit of organisation (e.g. "Demo Studio")
+ * brand       a consumer-facing identity owned by a studio (e.g. "Brand One")
  * user        a global identity, one row per person, id issued by the auth provider
  * membership  links a user to a studio with a role
  * color_theme a switchable palette owned by a studio and assigned to brands
@@ -105,7 +105,7 @@ export const themeColors = pgTable(
       .references(() => colorThemes.id, { onDelete: 'cascade' }),
     /** The semantic slot. Exactly one row per role per theme. */
     role: colorRole('role').notNull(),
-    /** Brand name for the colour, e.g. "Princess Pink". */
+    /** Brand name for the colour, e.g. "Signal Blue". */
     name: text('name').notNull(),
     /** Plain-language description, e.g. "Vivid hot pink". */
     description: text('description').notNull().default(''),
@@ -129,7 +129,7 @@ export const brands = pgTable(
       .references(() => studios.id, { onDelete: 'cascade' }),
     slug: text('slug').notNull(),
     name: text('name').notNull(),
-    /** Hostnames this brand answers on, e.g. ["devinella.com"]. */
+    /** Hostnames this brand answers on, e.g. ["brand-one.example"]. */
     domains: text('domains')
       .array()
       .notNull()

@@ -1,20 +1,20 @@
 # Studiohouse monorepo
 
 A multi-tenant content platform for adult production studios, built to be offered as SaaS.
-Hierarchy: **studio** (tenant, e.g. Princess Productions) owns **brands** (consumer-facing
-identities, e.g. Devinella); **users** join studios through **memberships**.
+Hierarchy: **studio** (tenant, e.g. Demo Studio) owns **brands** (consumer-facing
+identities, e.g. Brand One); **users** join studios through **memberships**.
 Read `docs/README.md` first; it links to the architecture, database, backend and
 white-label docs. Keep those docs current when you change the things they describe.
 
 ## What lives here
 
-- `apps/cms-admin` (+ `cms-admin-e2e`) — Angular admin CMS for updating and monitoring every brand.
+- `apps/cms-admin` (+ `cms-admin-e2e`) — Angular admin CMS for updating and monitoring every brand. `src/app/core/session.service.ts` loads `GET /me` after sign-in and holds the active studio, role and brands (studio choice remembered per browser); `sessionGuard` runs it before the shell renders. Component tests stub `/me` through `src/app/testing/me.fixture.ts`.
 - Future `apps/*` — white-label apps: one codebase per app, styled and populated per brand at build or run time. See `docs/white-label.md`.
 - `apps/cms-api` — the API as a **Neon Function** (Hono), declared in the root `neon.ts` with `auth: true`. Local: `neon dev --source apps/cms-api/src/index.ts --port 3000`; deploy: `neon deploy --env .env.local`. See `docs/backend.md`.
 - `packages/shared/auth` (`@studiohouse/auth`) — Managed Better Auth client for Angular: `provideNeonAuth()`, `AuthService` (signals), `authGuard`/`signedOutGuard`, and `authInterceptor` that attaches the Neon Auth JWT to API calls.
-- `packages/shared/ui` (`@studiohouse/ui`) — the `ColorTheme` model (five colour roles, optional status colours and fonts), `STUDIOHOUSE_THEME` (the product theme), `PRINCESS_PRODUCTIONS_THEME` (a brand theme), `provideColorTheme()`, the `[shBrandTheme]` directive, and `theme.css` that maps `--brand-*` variables onto Spartan tokens. `packages/shared/ui-helm` holds generated Spartan helm primitives, imported as `@spartan-ng/helm/<name>`.
+- `packages/shared/ui` (`@studiohouse/ui`) — the `ColorTheme` model (re-exported from `@studiohouse/models`), `STUDIOHOUSE_THEME` (the product theme), `DEMO_BRAND_THEME` (an example brand theme), `provideColorTheme()`, the `[shBrandTheme]` directive, and `theme.css` that maps `--brand-*` variables onto Spartan tokens. `packages/shared/ui-helm` holds generated Spartan helm primitives, imported as `@spartan-ng/helm/<name>`.
 - `packages/shared/db` (`@studiohouse/db`) — Drizzle schema, migrations, seed and Neon client. Targets: `db:generate`, `db:migrate`, `db:push`, `db:seed`, `db:studio`.
-- `packages/shared/models` — shared data models.
+- `packages/shared/models` (`@studiohouse/models`) — plain contracts shared by API and apps: the `ColorTheme` types and the `/me` response (`MeResponse`, `BrandSummary`, …). Add new API contracts here first.
 
 ## Domain rules
 

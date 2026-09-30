@@ -12,6 +12,7 @@ import { provideRouter } from '@angular/router';
 import { NEON_AUTH_OPTIONS, provideNeonAuth } from './auth.config';
 import { authInterceptor } from './auth.interceptor';
 import {
+  AUTH_FETCH,
   AuthError,
   AuthService,
   NEON_AUTH_CLIENT,
@@ -27,7 +28,6 @@ function failingClient(): NeonAuthClient {
     getSession: async () => ({
       data: { user: { id: 'u', email: 'e@x.test' } },
     }),
-    token: async () => ({ data: null, error: { message: 'no session' } }),
   };
 }
 
@@ -42,6 +42,11 @@ function setup(client: NeonAuthClient, options = {}) {
       provideHttpClient(withInterceptors([authInterceptor])),
       provideHttpClientTesting(),
       { provide: NEON_AUTH_CLIENT, useValue: client },
+      // No session: the token endpoint answers 401.
+      {
+        provide: AUTH_FETCH,
+        useValue: async () => new Response('', { status: 401 }),
+      },
     ],
   });
   return TestBed.inject(AuthService);
@@ -129,6 +134,33 @@ describe('NEON_AUTH_CLIENT', () => {
     expect(typeof client.signIn.email).toBe('function');
     expect(typeof client.getSession).toBe('function');
     expect(typeof client.token).toBe('function');
+  });
+});
+
+describe('AUTH_FETCH', () => {
+  it('defaults to the global fetch', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNeonAuth({ url: 'https://auth.example.test/neondb/auth' }),
+      ],
+    });
+    expect(typeof TestBed.inject(AUTH_FETCH)).toBe('function');
+  });
+});
+
+describe('AuthService.getToken', () => {
+  it('returns null when the token endpoint answers with a malformed body', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNeonAuth({ url: 'https://auth.example.test/neondb/auth' }),
+        { provide: NEON_AUTH_CLIENT, useValue: failingClient() },
+        {
+          provide: AUTH_FETCH,
+          useValue: async () => new Response('not json', { status: 200 }),
+        },
+      ],
+    });
+    expect(await TestBed.inject(AuthService).getToken()).toBeNull();
   });
 });
 

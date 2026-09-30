@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 import { authGuard, signedOutGuard } from '@studiohouse/auth';
+import { sessionGuard } from './core/session.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -9,7 +10,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, sessionGuard],
     children: [
       {
         path: '',

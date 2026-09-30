@@ -8,12 +8,12 @@ import {
   colorThemeToCssVariables,
   provideColorTheme,
 } from './color-theme.service';
-import { PRINCESS_PRODUCTIONS_THEME } from './princess-productions.theme';
+import { DEMO_BRAND_THEME } from './demo-brand.theme';
 import { STUDIOHOUSE_THEME } from './studiohouse.theme';
 
 describe('ColorTheme', () => {
   it('defines every core role in both built-in themes', () => {
-    for (const theme of [PRINCESS_PRODUCTIONS_THEME, STUDIOHOUSE_THEME]) {
+    for (const theme of [DEMO_BRAND_THEME, STUDIOHOUSE_THEME]) {
       for (const role of COLOR_ROLES) {
         expect(theme.colors[role].hex).toMatch(/^#[0-9A-F]{6}$/i);
         expect(theme.colors[role].name).not.toBe('');
@@ -30,12 +30,12 @@ describe('ColorTheme', () => {
   });
 
   it('flattens core roles only when optional slots are absent', () => {
-    expect(colorThemeToCssVariables(PRINCESS_PRODUCTIONS_THEME)).toEqual({
-      '--brand-primary': '#EE2762',
-      '--brand-ink': '#181518',
-      '--brand-paper': '#F5E7D5',
-      '--brand-secondary': '#861D3B',
-      '--brand-tint': '#F4B5C5',
+    expect(colorThemeToCssVariables(DEMO_BRAND_THEME)).toEqual({
+      '--brand-primary': '#2563EB',
+      '--brand-ink': '#0F172A',
+      '--brand-paper': '#F8FAFC',
+      '--brand-secondary': '#7C3AED',
+      '--brand-tint': '#CBD5E1',
     });
   });
 
@@ -50,10 +50,10 @@ describe('ColorTheme', () => {
     const root = document.createElement('div');
     applyColorTheme(STUDIOHOUSE_THEME, root);
     expect(root.style.getPropertyValue('--brand-success')).toBe('#A7B8A1');
-    applyColorTheme(PRINCESS_PRODUCTIONS_THEME, root);
+    applyColorTheme(DEMO_BRAND_THEME, root);
     expect(root.style.getPropertyValue('--brand-success')).toBe('');
     expect(root.style.getPropertyValue('--font-display')).toBe('');
-    expect(root.dataset['theme']).toBe('princess-productions');
+    expect(root.dataset['theme']).toBe('demo-brand');
   });
 
   it('applies the provided theme at bootstrap', () => {
@@ -73,12 +73,12 @@ describe('ColorTheme', () => {
       template: `<section [shBrandTheme]="theme"></section>`,
     })
     class Host {
-      theme = PRINCESS_PRODUCTIONS_THEME;
+      theme = DEMO_BRAND_THEME;
     }
     const fixture = TestBed.createComponent(Host);
     await fixture.whenStable();
     const section: HTMLElement = fixture.nativeElement.querySelector('section');
-    expect(section.style.getPropertyValue('--brand-primary')).toBe('#EE2762');
-    expect(section.dataset['theme']).toBe('princess-productions');
+    expect(section.style.getPropertyValue('--brand-primary')).toBe('#2563EB');
+    expect(section.dataset['theme']).toBe('demo-brand');
   });
 });
