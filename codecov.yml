@@ -3,13 +3,15 @@ coverage:
   precision: 1
   round: down
   status:
+    # Never regress overall coverage by more than a point relative to the base branch.
     project:
       default:
-        target: 80%
+        target: auto
         threshold: 1%
+    # New or changed lines must be nearly all tested; 100% stays the local goal.
     patch:
       default:
-        target: 90%
+        target: 95%
 
 comment:
   layout: 'condensed_header, diff, files'

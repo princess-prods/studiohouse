@@ -33,7 +33,7 @@ white-label docs. Keep those docs current when you change the things they descri
 - Tags: `scope:shared`, `scope:cms-admin`, `scope:api`, plus one `scope:<name>` per new app family. Add the matching `depConstraints` entry in `eslint.config.mjs` when you add a scope.
 - Angular apps: standalone components, esbuild, Vitest (Analog) unit tests, Playwright e2e, CSS styles. Selector prefix for the CMS is `cms`.
 - Libraries are non-buildable unless they are published.
-- Before opening a pull request, run the `coverage` skill: every changed project aims for 100% line coverage. The `coverage-gate` hook (`.claude/hooks/coverage-gate.mjs`) runs on `gh pr create`, blocks below the Codecov floor (80% lines) and reports remaining gaps; note deliberate exclusions in the PR body.
+- Before opening a pull request, run the `coverage` skill: every changed project aims for 100% line coverage. The `coverage-gate` hook (`.claude/hooks/coverage-gate.mjs`) runs on `gh pr create`, blocks below 80% lines and reports remaining gaps; Codecov (`codecov.yml`) requires no overall regression and 95% on changed lines; note deliberate exclusions in the PR body.
 - Styling: Tailwind v4 (PostCSS, `.postcssrc.json`) + Spartan UI. Add primitives with `npx nx g @spartan-ng/cli:ui --name=<primitive> --no-interactive` (config in `components.json`). Use design tokens (`bg-primary`, `text-muted-foreground`, `text-success`), brand utilities (`bg-brand-primary`), and font utilities (`font-display`, `font-sans`), never raw hex in components. Section labels use the `eyebrow` utility.
 
 # General Guidelines for working with Nx
