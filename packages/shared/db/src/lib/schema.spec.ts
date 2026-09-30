@@ -20,6 +20,19 @@ describe('schema', () => {
     }
   });
 
+  it('resolves every foreign key to a known table', () => {
+    const known = new Set(['studios', 'users', 'color_themes', 'brands']);
+    let count = 0;
+    for (const table of [brands, colorThemes, memberships, themeColors]) {
+      for (const fk of getTableConfig(table).foreignKeys) {
+        const target = getTableConfig(fk.reference().foreignTable).name;
+        expect(known.has(target)).toBe(true);
+        count++;
+      }
+    }
+    expect(count).toBe(6);
+  });
+
   it('keeps colour roles in sync with the ui ColorRole union', () => {
     // Mirror of COLOR_ROLES in @studiohouse/ui. Update both when adding a role.
     expect(colorRole.enumValues).toEqual([

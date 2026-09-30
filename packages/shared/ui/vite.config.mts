@@ -23,6 +23,14 @@ export default defineConfig(() => ({
     coverage: {
       reportsDirectory: '../../../coverage/packages/shared/ui',
       provider: 'v8' as const,
+      reporter: ['text-summary', 'json-summary', 'lcov'],
+      include: ['src/**/*.ts'],
+      exclude: [
+        'src/**/*.spec.ts',
+        'src/**/*.test.ts',
+        'src/test-setup.ts',
+        'src/index.ts',
+      ],
     },
   },
 }));

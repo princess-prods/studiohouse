@@ -59,3 +59,4 @@ vitest.config.*.timestamp*
 .env.local
 .env.*.local
 .neon
+coverage

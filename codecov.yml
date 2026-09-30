@@ -1,0 +1,28 @@
+# Codecov is the floor on pull requests; the local target is 100% (see .claude/skills/coverage).
+coverage:
+  precision: 1
+  round: down
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 1%
+    patch:
+      default:
+        target: 90%
+
+comment:
+  layout: 'condensed_header, diff, files'
+  behavior: default
+  require_changes: true
+
+ignore:
+  - '**/*.spec.ts'
+  - '**/test-setup.ts'
+  - '**/index.ts'
+  - 'apps/cms-admin/src/main.ts'
+  - 'apps/cms-admin/src/environments/**'
+  - 'packages/shared/db/src/seed.ts'
+  - 'packages/shared/db/migrations/**'
+  - 'packages/shared/ui-helm/**'
+  - 'apps/cms-admin-e2e/**'

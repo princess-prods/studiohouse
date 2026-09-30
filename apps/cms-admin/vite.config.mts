@@ -23,6 +23,16 @@ export default defineConfig(() => ({
     coverage: {
       reportsDirectory: '../../coverage/apps/cms-admin',
       provider: 'v8' as const,
+      reporter: ['text-summary', 'json-summary', 'lcov'],
+      include: ['src/**/*.ts'],
+      exclude: [
+        'src/**/*.spec.ts',
+        'src/**/*.test.ts',
+        'src/test-setup.ts',
+        'src/index.ts',
+        'src/main.ts',
+        'src/environments/**',
+      ],
     },
   },
 }));
