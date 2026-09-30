@@ -14,6 +14,7 @@ import {
   ColorTheme,
   HexColor,
   MeResponse,
+  MembershipSummary,
   ThemeColor,
 } from '@studiohouse/models';
 import { eq, inArray } from 'drizzle-orm';
@@ -69,7 +70,7 @@ export async function getMe(
     }
   }
 
-  const result: MeResponse['memberships'] = [];
+  const result: MembershipSummary[] = [];
   for (const row of rows) {
     result.push({
       studio: row.studio,
@@ -145,8 +146,8 @@ export async function loadBrands(
     }
   }
 
-  return brandRows.map(({ themeId, ...brand }) => ({
+  return brandRows.map((brand) => ({
     ...brand,
-    theme: (themeId && themes.get(themeId)) || null,
+    theme: (brand.themeId && themes.get(brand.themeId)) || null,
   }));
 }

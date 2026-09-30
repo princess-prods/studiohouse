@@ -1,0 +1,111 @@
+<div class="grid gap-6 lg:grid-cols-[1fr_18rem]">
+  <form class="flex flex-col gap-5" (ngSubmit)="submit()">
+    <div class="flex flex-col gap-1.5">
+      <label hlmLabel for="theme-name">Theme name</label>
+      <input
+        hlmInput
+        id="theme-name"
+        name="themeName"
+        required
+        [disabled]="!canEdit()"
+        [ngModel]="name()"
+        (ngModelChange)="setName($event)"
+      />
+    </div>
+
+    <fieldset class="flex flex-col gap-3" [disabled]="!canEdit()">
+      <legend class="eyebrow mb-1">Colours</legend>
+      @for (row of rows(); track row.role) {
+      <div
+        class="border-border grid grid-cols-[2.5rem_1fr] items-start gap-3 rounded-lg border p-3 sm:grid-cols-[2.5rem_7rem_1fr]"
+      >
+        <input
+          type="color"
+          class="h-10 w-10 cursor-pointer rounded-md border-0 bg-transparent p-0"
+          [attr.aria-label]="row.label + ' colour'"
+          [value]="row.hex"
+          (input)="update(row.role, { hex: $any($event.target).value })"
+        />
+        <div class="flex flex-col gap-1">
+          <label hlmLabel [for]="'hex-' + row.role">{{ row.label }}</label>
+          <input
+            hlmInput
+            class="font-mono text-xs uppercase"
+            [id]="'hex-' + row.role"
+            [name]="'hex-' + row.role"
+            maxlength="7"
+            pattern="^#[0-9A-Fa-f]{6}$"
+            [ngModel]="row.hex"
+            (ngModelChange)="update(row.role, { hex: $event })"
+          />
+        </div>
+        <div class="col-span-2 flex flex-col gap-1 sm:col-span-1">
+          <label hlmLabel [for]="'name-' + row.role">Name</label>
+          <input
+            hlmInput
+            [id]="'name-' + row.role"
+            [name]="'name-' + row.role"
+            required
+            [placeholder]="row.hint"
+            [ngModel]="row.name"
+            (ngModelChange)="update(row.role, { name: $event })"
+          />
+          <p class="text-muted-foreground text-xs">{{ row.hint }}</p>
+        </div>
+      </div>
+      }
+    </fieldset>
+
+    @if (error(); as message) {
+    <p class="text-destructive text-sm" role="alert">{{ message }}</p>
+    } @if (canEdit()) {
+    <div class="flex gap-2">
+      <button hlmBtn type="submit" [disabled]="!valid() || busy()">
+        {{ theme() ? 'Save theme' : 'Create theme' }}
+      </button>
+      <button
+        hlmBtn
+        variant="ghost"
+        type="button"
+        [disabled]="busy()"
+        (click)="reset(theme())"
+      >
+        Reset
+      </button>
+    </div>
+    }
+  </form>
+
+  <!-- Live preview, rendered in the theme being edited. -->
+  <aside
+    [shBrandTheme]="preview()"
+    class="bg-background text-foreground border-border flex flex-col gap-3 self-start rounded-xl border p-4"
+    aria-label="Theme preview"
+  >
+    <p
+      class="text-muted-foreground text-[0.7rem] font-medium tracking-[0.2em] uppercase"
+    >
+      Preview
+    </p>
+    <p class="text-lg font-semibold">{{ preview().name }}</p>
+    <div hlmCard class="bg-card text-card-foreground p-3">
+      <p class="text-sm">Card surface with body text.</p>
+      <p class="text-muted-foreground text-xs">Muted supporting text.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button hlmBtn size="sm" type="button">Primary</button>
+      <button hlmBtn size="sm" variant="secondary" type="button">
+        Secondary
+      </button>
+      <button hlmBtn size="sm" variant="outline" type="button">Outline</button>
+    </div>
+    <div class="flex h-2 overflow-hidden rounded-full" aria-hidden="true">
+      @for (row of rows(); track row.role) {
+      <span
+        class="flex-1"
+        [style.background-color]="preview().colors[row.role].hex"
+      ></span>
+      }
+    </div>
+  </aside>
+</div>

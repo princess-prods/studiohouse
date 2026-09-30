@@ -89,7 +89,7 @@ export class App {
 
   protected readonly primaryNav: readonly NavItem[] = [
     { label: 'Dashboard', icon: 'lucideHouse', path: '/' },
-    { label: 'Brands', icon: 'lucideLayers', path: '/brands', soon: true },
+    { label: 'Brands', icon: 'lucideLayers', path: '/brands' },
     {
       label: 'Content',
       icon: 'lucideClapperboard',

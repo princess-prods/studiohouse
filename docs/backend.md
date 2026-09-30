@@ -60,6 +60,10 @@ many requests.
 | `/health` | none   | `{ ok: true }`                                                            |
 | `/me`     | bearer | The caller, and every studio they belong to with its role and its brands. |
 
+## Authorization
+
+`requireRole(db, user, studioId, role)` resolves the caller's membership. Non-members get 404 (studio ids are not enumerable); members below the required role get 403. Roles rank viewer < editor < admin < owner; `BRAND_WRITE_ROLE` is admin and `BRAND_DELETE_ROLE` is owner (`@studiohouse/models`). Validation errors return 400 with `issues[{ path, message }]`; duplicate slugs return 409.
+
 ## First-run bootstrap
 
 A fresh database has a studio but no members. When `BOOTSTRAP_OWNER_EMAIL` matches the

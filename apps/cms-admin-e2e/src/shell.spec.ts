@@ -79,6 +79,40 @@ test.describe('signed in', () => {
     await expect(page).toHaveURL(/\/sign-in\?returnTo=%2F$/);
   });
 
+  test('creates, edits and deletes a brand with a theme', async ({ page }) => {
+    const stamp = Date.now().toString(36);
+    await page
+      .getByRole('navigation', { name: 'Main' })
+      .getByText('Brands')
+      .click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Brands');
+
+    await page.getByRole('button', { name: 'New brand' }).click();
+    await page.getByLabel('Name').fill(`E2E ${stamp}`);
+    await expect(page.getByLabel('Slug')).toHaveValue(`e2e-${stamp}`);
+    await page.getByRole('button', { name: 'Create brand' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      `E2E ${stamp}`,
+    );
+
+    const themePicker = page.getByRole('combobox', {
+      name: 'Theme',
+      exact: true,
+    });
+    await themePicker.selectOption('__new__');
+    await page.getByLabel('Theme name').fill(`Theme ${stamp}`);
+    await page.getByRole('button', { name: 'Create theme' }).click();
+    await expect(themePicker).not.toHaveValue('__new__');
+    await expect(
+      page.getByRole('button', { name: 'Save theme' }),
+    ).toBeVisible();
+
+    page.once('dialog', (d) => d.accept());
+    await page.getByRole('button', { name: 'Delete brand' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Brands');
+    await expect(page.getByText(`E2E ${stamp}`)).toHaveCount(0);
+  });
+
   test('toggles between dark and light schemes', async ({ page }) => {
     const html = page.locator('html');
     const toggle = page.getByRole('button', {

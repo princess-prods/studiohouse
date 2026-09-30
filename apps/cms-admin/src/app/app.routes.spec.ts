@@ -2,6 +2,8 @@ import { Route } from '@angular/router';
 import { authGuard, signedOutGuard } from '@studiohouse/auth';
 import { appConfig } from './app.config';
 import { appRoutes } from './app.routes';
+import { BrandPage } from './brands/brand-page';
+import { BrandsPage } from './brands/brands-page';
 import { sessionGuard } from './core/session.guard';
 import { Dashboard } from './dashboard/dashboard';
 import { SignIn } from './sign-in/sign-in';
@@ -25,6 +27,14 @@ describe('appRoutes', () => {
     const dashboard = route('', shell.children);
     expect(dashboard.pathMatch).toBe('full');
     await expect(dashboard.loadComponent?.()).resolves.toBe(Dashboard);
+  });
+
+  it('lazy-loads the brands list and brand editor inside the shell', async () => {
+    const shell = route('');
+    const list = route('brands', shell.children);
+    const editor = route('brands/:brandId', shell.children);
+    await expect(list.loadComponent?.()).resolves.toBe(BrandsPage);
+    await expect(editor.loadComponent?.()).resolves.toBe(BrandPage);
   });
 
   it('redirects unknown paths home', () => {
