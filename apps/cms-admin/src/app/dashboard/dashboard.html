@@ -1,0 +1,91 @@
+<div class="flex flex-col gap-8">
+  <div>
+    <p class="eyebrow">Overview</p>
+    <h1 class="mt-1 text-3xl font-medium">Dashboard</h1>
+  </div>
+
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Stats">
+    @for (stat of stats; track stat.label) {
+    <div hlmCard class="flex flex-row items-center gap-4 px-5 py-4">
+      <span
+        class="bg-accent text-accent-foreground flex size-11 shrink-0 items-center justify-center rounded-xl"
+      >
+        <ng-icon [name]="stat.icon" size="20" />
+      </span>
+      <div>
+        <p class="font-display text-2xl leading-none">{{ stat.value }}</p>
+        <p class="text-muted-foreground mt-1 text-sm">{{ stat.label }}</p>
+      </div>
+    </div>
+    }
+  </section>
+
+  <section class="grid gap-6 lg:grid-cols-[1fr_20rem]">
+    <div hlmCard>
+      <div hlmCardHeader>
+        <h2 hlmCardTitle class="text-xl">Recent content</h2>
+        <p hlmCardDescription>Nothing published yet.</p>
+      </div>
+      <div hlmCardContent>
+        <div
+          class="border-border text-muted-foreground flex h-40 items-center justify-center rounded-lg border border-dashed text-sm"
+        >
+          Uploads will appear here.
+        </div>
+      </div>
+    </div>
+
+    <div hlmCard>
+      <div hlmCardHeader>
+        <p class="eyebrow">Brand themes</p>
+        <h2 hlmCardTitle class="text-xl">{{ brands.length }} brands</h2>
+      </div>
+      <div hlmCardContent class="flex flex-col gap-3">
+        @for (brand of brands; track brand.slug) {
+        <!-- Each preview is rendered in its own brand's colours, inside the Studiohouse shell. -->
+        <article
+          [shBrandTheme]="brand.theme"
+          class="bg-background text-foreground border-border overflow-hidden rounded-lg border"
+        >
+          <div class="flex items-center justify-between gap-3 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <span
+                class="bg-primary flex size-8 rounded-full"
+                aria-hidden="true"
+              ></span>
+              <div>
+                <p class="text-sm font-medium">{{ brand.name }}</p>
+                <p class="text-muted-foreground text-xs">
+                  {{ brand.theme.name }}
+                </p>
+              </div>
+            </div>
+            <button
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              type="button"
+              aria-label="Open {{ brand.name }}"
+            >
+              <ng-icon name="lucideChevronRight" size="16" />
+            </button>
+          </div>
+          <div class="flex h-2" aria-hidden="true">
+            @for (role of roles; track role) {
+            <span
+              class="flex-1"
+              [style.background-color]="brand.theme.colors[role].hex"
+            ></span>
+            }
+          </div>
+        </article>
+        }
+      </div>
+      <div hlmCardFooter>
+        <button hlmBtn variant="outline" size="sm" type="button" class="w-full">
+          Manage brands
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

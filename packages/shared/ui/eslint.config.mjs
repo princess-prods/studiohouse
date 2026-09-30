@@ -12,7 +12,7 @@ export default [
         'error',
         {
           type: 'attribute',
-          prefix: 'pp',
+          prefix: 'sh',
           style: 'camelCase',
         },
       ],
@@ -20,7 +20,7 @@ export default [
         'error',
         {
           type: 'element',
-          prefix: 'pp',
+          prefix: 'sh',
           style: 'kebab-case',
         },
       ],

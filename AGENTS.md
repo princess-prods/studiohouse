@@ -11,7 +11,7 @@ white-label docs. Keep those docs current when you change the things they descri
 - `apps/cms-admin` (+ `cms-admin-e2e`) — Angular admin CMS for updating and monitoring every brand.
 - Future `apps/*` — white-label apps: one codebase per app, styled and populated per brand at build or run time. See `docs/white-label.md`.
 - Backend functions (planned `apps/cms-api`) — **Vercel Functions** that talk to Postgres on **Neon**, wired together through the Neon ↔ Vercel integration (managed from the Neon dashboard). See `docs/backend.md`.
-- `packages/shared/ui` (`@studiohouse/ui`) — the `ColorTheme` model, the house palette, `provideColorTheme()`, and `theme.css` that maps brand colours onto Spartan tokens. `packages/shared/ui-helm` holds generated Spartan helm primitives, imported as `@spartan-ng/helm/<name>`.
+- `packages/shared/ui` (`@studiohouse/ui`) — the `ColorTheme` model (five colour roles, optional status colours and fonts), `STUDIOHOUSE_THEME` (the product theme), `PRINCESS_PRODUCTIONS_THEME` (a brand theme), `provideColorTheme()`, the `[shBrandTheme]` directive, and `theme.css` that maps `--brand-*` variables onto Spartan tokens. `packages/shared/ui-helm` holds generated Spartan helm primitives, imported as `@spartan-ng/helm/<name>`.
 - `packages/shared/db` (`@studiohouse/db`) — Drizzle schema, migrations, seed and Neon client. Targets: `db:generate`, `db:migrate`, `db:push`, `db:seed`, `db:studio`.
 - `packages/shared/models` — shared data models.
 
@@ -21,6 +21,7 @@ white-label docs. Keep those docs current when you change the things they descri
 - Every content row belongs to exactly one brand (`brand_id`). API calls carry studio (from the session) and brand (from the request); verify the brand belongs to the studio. Only CMS monitoring views read across a studio's brands.
 - Studio selection happens at login through membership, not through a picker. Users with several memberships choose once and can switch.
 - Colour roles (`primary`, `ink`, `paper`, `secondary`, `tint`) are enumerated in both `@studiohouse/ui` and the `color_role` Postgres enum. Change both together.
+- The CMS shell wears the Studiohouse product theme (dark by default, Playfair Display + Inter, copper accent). A brand's theme is applied only to brand-scoped previews and editors via `[shBrandTheme]="theme"`, never to the shell.
 - No brand-specific branching in code (`if (brand === 'x')`). Differences are theme tokens or feature flags stored on the brand record.
 - Database: one Neon project, `main` branch = prod, `dev` branch = shared dev, one preview branch per PR. Functions read only `DATABASE_URL`; the same code runs against every branch. See `docs/database.md`.
 - Never commit connection strings or credentials. Use `.env.local` and CI secrets.
@@ -30,7 +31,7 @@ white-label docs. Keep those docs current when you change the things they descri
 - Tags: `scope:shared`, `scope:cms-admin`, `scope:api`, plus one `scope:<name>` per new app family. Add the matching `depConstraints` entry in `eslint.config.mjs` when you add a scope.
 - Angular apps: standalone components, esbuild, Vitest (Analog) unit tests, Playwright e2e, CSS styles. Selector prefix for the CMS is `cms`.
 - Libraries are non-buildable unless they are published.
-- Styling: Tailwind v4 (PostCSS, `.postcssrc.json`) + Spartan UI. Add primitives with `npx nx g @spartan-ng/cli:ui --name=<primitive> --no-interactive` (config in `components.json`). Use design tokens (`bg-primary`, `text-muted-foreground`) or brand utilities (`bg-brand-primary`), never raw hex in components.
+- Styling: Tailwind v4 (PostCSS, `.postcssrc.json`) + Spartan UI. Add primitives with `npx nx g @spartan-ng/cli:ui --name=<primitive> --no-interactive` (config in `components.json`). Use design tokens (`bg-primary`, `text-muted-foreground`, `text-success`), brand utilities (`bg-brand-primary`), and font utilities (`font-display`, `font-sans`), never raw hex in components. Section labels use the `eyebrow` utility.
 
 # General Guidelines for working with Nx
 

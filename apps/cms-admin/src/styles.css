@@ -5,22 +5,24 @@
 
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
 
-/* Brand tokens: the --brand-* variables are set at runtime by provideColorTheme(). */
+/* Studiohouse tokens. The --brand-* and --font-* variables are set at runtime by provideColorTheme(). */
 @import '../../../packages/shared/ui/src/lib/theme/theme.css';
-
-:root {
-  color-scheme: light;
-  --font-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-    'Segoe UI Symbol', 'Noto Color Emoji';
-}
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
   }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+}
+
+/* Small-caps section labels from the brand board. */
+@utility eyebrow {
+  @apply text-muted-foreground text-[0.7rem] font-medium tracking-[0.2em] uppercase;
 }

@@ -1,36 +1,119 @@
-<header class="flex items-center justify-between border-b px-6 py-4">
-  <h1 class="text-2xl font-semibold tracking-tight text-brand-primary">
-    Studiohouse
-  </h1>
-  <button hlmBtn variant="outline" type="button" (click)="toggleDark()">
-    Toggle dark mode
-  </button>
-</header>
+<div class="flex min-h-screen">
+  <!-- Sidebar -->
+  <aside
+    class="bg-sidebar text-sidebar-foreground border-sidebar-border flex w-60 shrink-0 flex-col border-r"
+  >
+    <a routerLink="/" class="flex items-center gap-3 px-5 py-5">
+      <span
+        class="bg-brand-primary text-brand-ink font-display flex size-9 items-center justify-center rounded-lg text-lg font-semibold"
+        aria-hidden="true"
+        >S</span
+      >
+      <span class="text-lg leading-none">
+        <span class="font-light">studio</span
+        ><span class="font-semibold">house</span>
+      </span>
+    </a>
 
-<main class="mx-auto flex max-w-4xl flex-col gap-6 p-6">
-  <section hlmCard>
-    <div hlmCardHeader>
-      <h2 hlmCardTitle>Active theme</h2>
-      <p hlmCardDescription>{{ theme()?.name ?? 'None applied' }}</p>
+    <nav class="flex flex-1 flex-col gap-6 px-3 py-2" aria-label="Main">
+      <ul class="flex flex-col gap-0.5">
+        @for (item of primaryNav; track item.path) {
+        <li>
+          <ng-container
+            *ngTemplateOutlet="navLink; context: { $implicit: item }"
+          />
+        </li>
+        }
+      </ul>
+      <hlm-separator class="bg-sidebar-border" />
+      <ul class="flex flex-col gap-0.5">
+        @for (item of secondaryNav; track item.path) {
+        <li>
+          <ng-container
+            *ngTemplateOutlet="navLink; context: { $implicit: item }"
+          />
+        </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="border-sidebar-border border-t px-5 py-4">
+      <p class="eyebrow">Studio</p>
+      <p class="mt-1 text-sm font-medium">{{ studioName() }}</p>
     </div>
-    <div hlmCardContent class="grid gap-3 sm:grid-cols-5">
-      @for (role of roles; track role) { @let color = theme()?.colors?.[role];
-      <div class="flex flex-col gap-1">
-        <div
-          class="h-16 rounded-md border"
-          [style.background-color]="color?.hex"
-        ></div>
-        <span class="text-sm font-medium">{{ color?.name }}</span>
-        <span class="text-muted-foreground text-xs">{{ color?.hex }}</span>
+  </aside>
+
+  <!-- Main column -->
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header
+      class="border-border flex h-16 items-center justify-between gap-4 border-b px-8"
+    >
+      <label class="relative block w-full max-w-sm">
+        <ng-icon
+          name="lucideSearch"
+          class="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
+          size="16"
+        />
+        <input
+          hlmInput
+          type="search"
+          placeholder="Search…"
+          class="bg-muted/60 w-full rounded-full pl-9"
+        />
+      </label>
+      <div class="flex items-center gap-1">
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          type="button"
+          aria-label="Notifications"
+        >
+          <ng-icon name="lucideBell" size="18" />
+        </button>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          type="button"
+          aria-label="Toggle light or dark scheme"
+          (click)="toggleScheme()"
+        >
+          <ng-icon name="lucideSunMoon" size="18" />
+        </button>
+        <span
+          class="bg-brand-secondary text-brand-paper ml-2 flex size-8 items-center justify-center rounded-full text-xs font-semibold"
+          aria-label="Account"
+          >PP</span
+        >
       </div>
-      }
-    </div>
-    <div hlmCardFooter class="gap-2">
-      <button hlmBtn type="button">Primary</button>
-      <button hlmBtn variant="secondary" type="button">Secondary</button>
-      <button hlmBtn variant="ghost" type="button">Ghost</button>
-    </div>
-  </section>
+    </header>
 
-  <router-outlet></router-outlet>
-</main>
+    <main class="flex-1 px-8 py-8">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+<ng-template #navLink let-item>
+  @if (item.soon) {
+  <span
+    class="text-muted-foreground flex cursor-default items-center gap-3 rounded-lg px-3 py-2 text-sm"
+    aria-disabled="true"
+    title="Coming soon"
+  >
+    <ng-icon [name]="item.icon" size="18" />
+    {{ item.label }}
+  </span>
+  } @else {
+  <a
+    [routerLink]="item.path"
+    routerLinkActive="bg-sidebar-accent text-sidebar-accent-foreground"
+    [routerLinkActiveOptions]="{ exact: true }"
+    class="hover:bg-sidebar-accent/60 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+  >
+    <ng-icon [name]="item.icon" size="18" />
+    {{ item.label }}
+  </a>
+  }
+</ng-template>

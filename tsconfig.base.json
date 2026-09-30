@@ -30,7 +30,13 @@
       "@spartan-ng/helm/label": [
         "./packages/shared/ui-helm/label/src/index.ts"
       ],
-      "@studiohouse/db": ["./packages/shared/db/src/index.ts"]
+      "@studiohouse/db": ["./packages/shared/db/src/index.ts"],
+      "@spartan-ng/helm/badge": [
+        "./packages/shared/ui-helm/badge/src/index.ts"
+      ],
+      "@spartan-ng/helm/separator": [
+        "./packages/shared/ui-helm/separator/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]
