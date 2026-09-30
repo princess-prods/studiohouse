@@ -1,0 +1,116 @@
+/*
+ * Maps the five --brand-* brand variables (set at runtime by applyColorTheme)
+ * onto the Spartan / shadcn design tokens and exposes them to Tailwind.
+ *
+ * Import from an app's styles.css after the Tailwind and Spartan imports:
+ *   @import '../../../packages/shared/ui/src/lib/theme/theme.css';
+ *
+ * The fallbacks below are the Princess Productions palette so the page is
+ * never unstyled before the theme is applied.
+ */
+
+:root {
+  --brand-primary: #ee2762;
+  --brand-ink: #181518;
+  --brand-paper: #f5e7d5;
+  --brand-secondary: #861d3b;
+  --brand-tint: #f4b5c5;
+
+  --radius: 0.625rem;
+
+  --background: var(--brand-paper);
+  --foreground: var(--brand-ink);
+  --card: color-mix(in oklab, var(--brand-paper) 60%, white);
+  --card-foreground: var(--brand-ink);
+  --popover: color-mix(in oklab, var(--brand-paper) 60%, white);
+  --popover-foreground: var(--brand-ink);
+  --primary: var(--brand-primary);
+  --primary-foreground: var(--brand-paper);
+  --secondary: var(--brand-secondary);
+  --secondary-foreground: var(--brand-paper);
+  --muted: color-mix(in oklab, var(--brand-tint) 45%, var(--brand-paper));
+  --muted-foreground: color-mix(
+    in oklab,
+    var(--brand-ink) 60%,
+    var(--brand-paper)
+  );
+  --accent: var(--brand-tint);
+  --accent-foreground: var(--brand-ink);
+  --destructive: var(--brand-secondary);
+  --border: color-mix(in oklab, var(--brand-tint) 70%, var(--brand-ink));
+  --input: color-mix(in oklab, var(--brand-tint) 70%, var(--brand-ink));
+  --ring: var(--brand-primary);
+  --sidebar: color-mix(in oklab, var(--brand-tint) 35%, var(--brand-paper));
+  --sidebar-foreground: var(--brand-ink);
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: var(--brand-paper);
+  --sidebar-accent: var(--brand-tint);
+  --sidebar-accent-foreground: var(--brand-ink);
+  --sidebar-border: color-mix(
+    in oklab,
+    var(--brand-tint) 70%,
+    var(--brand-ink)
+  );
+  --sidebar-ring: var(--brand-primary);
+  --chart-1: var(--brand-primary);
+  --chart-2: var(--brand-secondary);
+  --chart-3: var(--brand-tint);
+  --chart-4: color-mix(in oklab, var(--brand-primary) 50%, var(--brand-ink));
+  --chart-5: color-mix(
+    in oklab,
+    var(--brand-secondary) 50%,
+    var(--brand-paper)
+  );
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  --background: var(--brand-ink);
+  --foreground: var(--brand-paper);
+  --card: color-mix(in oklab, var(--brand-ink) 88%, var(--brand-paper));
+  --card-foreground: var(--brand-paper);
+  --popover: color-mix(in oklab, var(--brand-ink) 88%, var(--brand-paper));
+  --popover-foreground: var(--brand-paper);
+  --primary: var(--brand-primary);
+  --primary-foreground: var(--brand-paper);
+  --secondary: var(--brand-secondary);
+  --secondary-foreground: var(--brand-paper);
+  --muted: color-mix(in oklab, var(--brand-ink) 80%, var(--brand-paper));
+  --muted-foreground: color-mix(
+    in oklab,
+    var(--brand-paper) 65%,
+    var(--brand-ink)
+  );
+  --accent: color-mix(in oklab, var(--brand-secondary) 60%, var(--brand-ink));
+  --accent-foreground: var(--brand-paper);
+  --destructive: color-mix(
+    in oklab,
+    var(--brand-primary) 70%,
+    var(--brand-secondary)
+  );
+  --border: color-mix(in oklab, var(--brand-paper) 15%, transparent);
+  --input: color-mix(in oklab, var(--brand-paper) 20%, transparent);
+  --ring: var(--brand-primary);
+  --sidebar: color-mix(in oklab, var(--brand-ink) 92%, var(--brand-paper));
+  --sidebar-foreground: var(--brand-paper);
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: var(--brand-paper);
+  --sidebar-accent: color-mix(
+    in oklab,
+    var(--brand-secondary) 60%,
+    var(--brand-ink)
+  );
+  --sidebar-accent-foreground: var(--brand-paper);
+  --sidebar-border: color-mix(in oklab, var(--brand-paper) 15%, transparent);
+  --sidebar-ring: var(--brand-primary);
+}
+
+/* Brand colours as Tailwind utilities: bg-brand-primary, text-brand-ink, border-brand-tint, ... */
+@theme inline {
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-paper: var(--brand-paper);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-tint: var(--brand-tint);
+}

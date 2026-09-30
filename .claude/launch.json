@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cms-admin",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["nx", "serve", "cms-admin"],
+      "port": 4200
+    }
+  ]
+}

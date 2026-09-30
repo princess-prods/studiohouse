@@ -1,0 +1,39 @@
+{
+  "name": "db",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/shared/db/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:data"],
+  "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit generate --config=packages/shared/db/drizzle.config.ts"
+      }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit migrate --config=packages/shared/db/drizzle.config.ts"
+      }
+    },
+    "push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit push --config=packages/shared/db/drizzle.config.ts"
+      }
+    },
+    "studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit studio --config=packages/shared/db/drizzle.config.ts"
+      }
+    },
+    "seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx --env-file=.env.local packages/shared/db/src/seed.ts"
+      }
+    }
+  }
+}

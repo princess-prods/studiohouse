@@ -1,0 +1,37 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "paths": {
+      "@studiohouse/models": ["./packages/shared/models/src/index.ts"],
+      "@studiohouse/ui": ["./packages/shared/ui/src/index.ts"],
+      "@spartan-ng/helm": ["./packages/shared/ui-helm/src/index.ts"],
+      "@spartan-ng/helm/button": [
+        "./packages/shared/ui-helm/button/src/index.ts"
+      ],
+      "@spartan-ng/helm/utils": [
+        "./packages/shared/ui-helm/utils/src/index.ts"
+      ],
+      "@spartan-ng/helm/card": ["./packages/shared/ui-helm/card/src/index.ts"],
+      "@spartan-ng/helm/input": [
+        "./packages/shared/ui-helm/input/src/index.ts"
+      ],
+      "@spartan-ng/helm/label": [
+        "./packages/shared/ui-helm/label/src/index.ts"
+      ],
+      "@studiohouse/db": ["./packages/shared/db/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}
