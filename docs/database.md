@@ -6,19 +6,19 @@ Neon's branching model makes separate _projects_ for dev and prod unnecessary in
 cases. A branch is a copy-on-write fork of another branch's schema and data, created in
 seconds and billed only for the data that diverges. The recommended layout is:
 
-| Neon branch    | Purpose                                                                  | Lifetime                   |
-| -------------- | ------------------------------------------------------------------------ | -------------------------- |
-| `main`         | **Production**. The only branch real apps and the CMS point at in prod.  | Permanent                  |
-| `dev`          | Shared development database. Reset from `main` when you want fresh data. | Permanent                  |
-| `preview/<pr>` | One branch per pull request, created from `dev` (or `main`) by CI.       | Deleted when the PR closes |
-| local scratch  | Optional per-developer branches for risky migrations.                    | Delete when done           |
+| Neon branch    | Purpose                                                                        | Lifetime                   |
+| -------------- | ------------------------------------------------------------------------------ | -------------------------- |
+| `production`   | **Production**. The only branch real apps and the CMS point at in prod.        | Permanent                  |
+| `dev`          | Shared development database. Reset from `production` when you want fresh data. | Permanent                  |
+| `preview/<pr>` | One branch per pull request, created from `dev` (or `main`) by CI.             | Deleted when the PR closes |
+| local scratch  | Optional per-developer branches for risky migrations.                          | Delete when done           |
 
 Why branches rather than two projects:
 
 - **Same schema by construction.** `dev` and every preview branch are forked from prod, so drift is impossible to introduce accidentally.
 - **Realistic data for free.** Forking gives you production-shaped data without copying dumps around.
 - **Cheap resets.** Reset `dev` from `main` in one click or one API call when it gets messy.
-- **PR previews.** The Neon ↔ Vercel integration creates a Neon branch for every Vercel preview deployment and deletes it when the deployment is removed, so every PR is tested against its own database without any CI scripting.
+- **Feature branches.** `neon checkout <name> --create --env .env.local` forks a branch from `dev`, applies `neon.ts` (auth + functions) to it and pulls its env, so a feature gets its own database, auth and API. Delete it when the PR merges.
 
 When a separate Neon **project** for prod _is_ worth it:
 
@@ -94,8 +94,8 @@ text because they vary per brand. The enum mirrors `ColorRole` in `@studiohouse/
 
 ## Environment variables
 
-| Variable       | Where it is set                                                                                                                                       |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL` | `.env.local` (git-ignored) locally (pull it with `vercel env pull`); injected by the Neon ↔ Vercel integration for preview and production deployments |
+| Variable                                                                            | Where it is set                                                                                                     |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_JWKS_URL` | Written to `.env.local` by `neon env pull` for the linked branch (`.neon`); injected into Neon Functions at runtime |
 
 Never commit a real connection string. Commit `.env.example` with placeholder values.

@@ -2,33 +2,38 @@
 
 Nx monorepo for a multi-tenant content platform for adult production studios, built so
 it can be offered as SaaS. Princess Productions is the first studio. It contains the internal CMS used to update and monitor every brand, the white-label
-apps that serve each brand, and the Vercel Functions that connect them to a
-Postgres database on [Neon](https://neon.tech).
+apps that serve each brand, and the Neon Function API that connects them to Lakebase
+Postgres and Managed Auth on [Neon](https://neon.com).
 
 Full documentation lives in [docs/](./docs/README.md):
 
 - [Architecture](./docs/architecture.md) — layout, tags, module boundaries
 - [Database strategy](./docs/database.md) — Neon branches for prod/dev/preview, migrations, testing
 - [White-label apps](./docs/white-label.md) — how one app serves many brands
-- [Backend functions](./docs/backend.md) — Vercel Functions that talk to Neon
+- [Backend](./docs/backend.md) — the API as a Neon Function (Hono) with Managed Auth JWT verification
 
 ## Projects
 
-| Project               | Type        | Tags              | Description                                   |
-| --------------------- | ----------- | ----------------- | --------------------------------------------- |
-| `cms-admin`           | Angular app | `scope:cms-admin` | Admin CMS for all brands                      |
-| `cms-admin-e2e`       | Playwright  |                   | End-to-end tests for `cms-admin`              |
-| `@studiohouse/db`     | TS library  | `scope:shared`    | Drizzle schema, migrations, seed, Neon client |
-| `@studiohouse/models` | TS library  | `scope:shared`    | Shared data models                            |
-| `@studiohouse/ui`     | Angular lib | `scope:shared`    | Colour theme model + Spartan token mapping    |
-| `ui-helm`             | Angular lib | `scope:shared`    | Spartan helm primitives                       |
+| Project               | Type          | Tags              | Description                                   |
+| --------------------- | ------------- | ----------------- | --------------------------------------------- |
+| `cms-admin`           | Angular app   | `scope:cms-admin` | Admin CMS for all brands                      |
+| `cms-admin-e2e`       | Playwright    |                   | End-to-end tests for `cms-admin`              |
+| `cms-api`             | Neon Function | `scope:api`       | Hono API: JWT verification, `/me`             |
+| `@studiohouse/auth`   | Angular lib   | `scope:shared`    | Managed Auth client, guards, interceptor      |
+| `@studiohouse/db`     | TS library    | `scope:shared`    | Drizzle schema, migrations, seed, Neon client |
+| `@studiohouse/models` | TS library    | `scope:shared`    | Shared data models                            |
+| `@studiohouse/ui`     | Angular lib   | `scope:shared`    | Colour theme model + Spartan token mapping    |
+| `ui-helm`             | Angular lib   | `scope:shared`    | Spartan helm primitives                       |
 
 ## Quick start
 
 ```bash
 npm install
 
-# Serve the CMS at http://localhost:4200
+# API (Neon Function) at http://localhost:3000, with branch env injected
+neon dev --source apps/cms-api/src/index.ts --port 3000
+
+# CMS at http://localhost:4200 (proxies /api to the function)
 npx nx serve cms-admin
 
 # Lint, test, build and typecheck everything

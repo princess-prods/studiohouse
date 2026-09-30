@@ -1,15 +1,32 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('CMS shell', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
+/**
+ * The signed-in flow needs a Managed Auth account on the linked Neon branch.
+ * Locally, `.env.local` supplies E2E_OWNER_EMAIL / E2E_OWNER_PASSWORD (create
+ * the account once through the sign-up form). Without them, only the
+ * unauthenticated tests run, which is what CI does today.
+ */
+const email = process.env['E2E_OWNER_EMAIL'];
+const password = process.env['E2E_OWNER_PASSWORD'];
+const hasAccount = Boolean(email && password);
 
-  test('opens on the dashboard in the Studiohouse theme', async ({ page }) => {
+test.describe('signed out', () => {
+  test('redirects to sign-in and remembers where you were going', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/sign-in\?returnTo=%2F$/);
     await expect(page).toHaveTitle('Studiohouse');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Dashboard',
+      'Welcome back',
     );
+    await expect(page.locator('aside')).toHaveCount(0);
+  });
+
+  test('sign-in page wears the Studiohouse theme, dark by default', async ({
+    page,
+  }) => {
+    await page.goto('/sign-in');
     await expect(page.locator('html')).toHaveAttribute(
       'data-theme',
       'studiohouse',
@@ -17,24 +34,51 @@ test.describe('CMS shell', () => {
     await expect(page.locator('html')).toHaveClass(/dark/);
   });
 
-  test('shows the main navigation', async ({ page }) => {
-    const nav = page.getByRole('navigation', { name: 'Main' });
-    for (const label of [
-      'Dashboard',
-      'Brands',
-      'Content',
-      'Talent',
-      'Settings',
-    ]) {
-      await expect(nav.getByText(label, { exact: true })).toBeVisible();
-    }
+  test('can switch to the sign-up form', async ({ page }) => {
+    await page.goto('/sign-in');
+    await page
+      .getByRole('button', { name: 'Need an account? Sign up' })
+      .click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Create your account',
+    );
+    await expect(page.getByLabel('Name')).toBeVisible();
+  });
+});
+
+test.describe('signed in', () => {
+  test.skip(!hasAccount, 'E2E_OWNER_EMAIL / E2E_OWNER_PASSWORD not set');
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/sign-in');
+    await page.getByLabel('Email').fill(email ?? '');
+    await page.getByLabel('Password').fill(password ?? '');
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await expect(page).toHaveURL(/\/$/);
   });
 
-  test('renders brand previews in their own theme', async ({ page }) => {
-    const previews = page.locator('article[data-theme="princess-productions"]');
-    await expect(previews).toHaveCount(2);
-    await expect(previews.first()).toContainText('Princess Productions');
-    await expect(previews.nth(1)).toContainText('Devinella');
+  test('shows the shell, navigation and brand previews', async ({ page }) => {
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Dashboard',
+    );
+    const nav = page.getByRole('navigation', { name: 'Main' });
+    for (const label of ['Dashboard', 'Brands', 'Content', 'Talent']) {
+      await expect(nav.getByText(label, { exact: true })).toBeVisible();
+    }
+    await expect(
+      page.locator('article[data-theme="princess-productions"]'),
+    ).toHaveCount(2);
+  });
+
+  test('keeps the session across a reload and signs out', async ({ page }) => {
+    await page.reload();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Dashboard',
+    );
+    await page.getByRole('button', { name: 'Sign out' }).click();
+    await expect(page).toHaveURL(/\/sign-in$/);
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/sign-in\?returnTo=%2F$/);
   });
 
   test('toggles between dark and light schemes', async ({ page }) => {

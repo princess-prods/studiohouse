@@ -5,7 +5,7 @@
 1. One internal CMS (`cms-admin`) to update and monitor every brand.
 2. A set of white-label apps, each built from one codebase and pointed at a specific brand.
 3. One Postgres database on Neon, shared by all studios and brands, isolated by `studio_id` and `brand_id` columns.
-4. Backend functions on Vercel that are environment-agnostic: the same code runs against the dev and prod databases.
+4. A Neon Function API that is branch-agnostic: the same code runs on the dev and production branches with that branch's database and auth injected.
 
 ## Workspace layout
 
@@ -33,7 +33,7 @@ packages/
     feature-*/      [scope:cms-admin,type:feature]  CMS feature areas (content, media, monitoring)
     data/           [scope:cms-admin,type:data]     CMS data access
 apps/
-  cms-api/          [scope:api]  Vercel Functions backend (see backend.md)
+  cms-api/          [scope:api]  Neon Function API, Hono (see backend.md)
 ```
 
 ## Tags and module boundaries

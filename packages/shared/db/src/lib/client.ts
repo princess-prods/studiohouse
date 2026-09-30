@@ -1,19 +1,39 @@
 import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { drizzle as drizzleHttp } from 'drizzle-orm/neon-http';
+import { drizzle as drizzleNode } from 'drizzle-orm/node-postgres';
+import { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
+import type { Pool } from 'pg';
 import * as schema from './schema';
 
-export type Database = ReturnType<typeof createDb>;
-
 /**
- * Creates a Drizzle client over Neon's HTTP driver. The connection string is
- * the only environment-specific input, so the same code runs against the
- * `main`, `dev` and preview branches.
+ * Driver-agnostic database handle. Both factories below satisfy it, so
+ * query code (handlers, seeds, tests) never depends on the transport.
  */
-export function createDb(connectionString = process.env['DATABASE_URL']) {
+export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
+
+function requireUrl(connectionString: string | undefined): string {
   if (!connectionString) {
     throw new Error(
-      'DATABASE_URL is not set. Copy .env.example to .env.local or run `vercel env pull`.',
+      'DATABASE_URL is not set. Run `neon env pull` or copy .env.example to .env.local.',
     );
   }
-  return drizzle(neon(connectionString), { schema });
+  return connectionString;
+}
+
+/**
+ * One-shot HTTP client over Neon's serverless driver. Right for scripts,
+ * seeds and lambda-style runtimes with no persistent process.
+ */
+export function createDb(
+  connectionString = process.env['DATABASE_URL'],
+): Database {
+  return drizzleHttp(neon(requireUrl(connectionString)), { schema });
+}
+
+/**
+ * Pooled node-postgres client for long-running runtimes such as Neon
+ * Functions. Create the pool once at module scope and pass it here.
+ */
+export function createPooledDb(pool: Pool): Database {
+  return drizzleNode(pool, { schema });
 }

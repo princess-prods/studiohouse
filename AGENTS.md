@@ -10,7 +10,8 @@ white-label docs. Keep those docs current when you change the things they descri
 
 - `apps/cms-admin` (+ `cms-admin-e2e`) — Angular admin CMS for updating and monitoring every brand.
 - Future `apps/*` — white-label apps: one codebase per app, styled and populated per brand at build or run time. See `docs/white-label.md`.
-- Backend functions (planned `apps/cms-api`) — **Vercel Functions** that talk to Postgres on **Neon**, wired together through the Neon ↔ Vercel integration (managed from the Neon dashboard). See `docs/backend.md`.
+- `apps/cms-api` — the API as a **Neon Function** (Hono), declared in the root `neon.ts` with `auth: true`. Local: `neon dev --source apps/cms-api/src/index.ts --port 3000`; deploy: `neon deploy --env .env.local`. See `docs/backend.md`.
+- `packages/shared/auth` (`@studiohouse/auth`) — Managed Better Auth client for Angular: `provideNeonAuth()`, `AuthService` (signals), `authGuard`/`signedOutGuard`, and `authInterceptor` that attaches the Neon Auth JWT to API calls.
 - `packages/shared/ui` (`@studiohouse/ui`) — the `ColorTheme` model (five colour roles, optional status colours and fonts), `STUDIOHOUSE_THEME` (the product theme), `PRINCESS_PRODUCTIONS_THEME` (a brand theme), `provideColorTheme()`, the `[shBrandTheme]` directive, and `theme.css` that maps `--brand-*` variables onto Spartan tokens. `packages/shared/ui-helm` holds generated Spartan helm primitives, imported as `@spartan-ng/helm/<name>`.
 - `packages/shared/db` (`@studiohouse/db`) — Drizzle schema, migrations, seed and Neon client. Targets: `db:generate`, `db:migrate`, `db:push`, `db:seed`, `db:studio`.
 - `packages/shared/models` — shared data models.
@@ -23,8 +24,9 @@ white-label docs. Keep those docs current when you change the things they descri
 - Colour roles (`primary`, `ink`, `paper`, `secondary`, `tint`) are enumerated in both `@studiohouse/ui` and the `color_role` Postgres enum. Change both together.
 - The CMS shell wears the Studiohouse product theme (dark by default, Playfair Display + Inter, copper accent). A brand's theme is applied only to brand-scoped previews and editors via `[shBrandTheme]="theme"`, never to the shell.
 - No brand-specific branching in code (`if (brand === 'x')`). Differences are theme tokens or feature flags stored on the brand record.
-- Database: one Neon project, `main` branch = prod, `dev` branch = shared dev, one preview branch per PR. Functions read only `DATABASE_URL`; the same code runs against every branch. See `docs/database.md`.
-- Never commit connection strings or credentials. Use `.env.local` and CI secrets.
+- Database: one Neon project (`holy-sun-92468174`), `production` branch = prod, `dev` branch = shared dev, feature branches via `neon checkout`. Functions and auth are branch-scoped; the same code runs against every branch. See `docs/database.md`.
+- Auth: browser signs in against Managed Auth; the API verifies a bearer JWT against `NEON_AUTH_JWKS_URL`. No session cookies cross to the API. A valid token is identity, not permission: handlers resolve memberships and authorise per resource.
+- Never commit connection strings or credentials. `.env.local` is written by `neon env pull` (linked via `.neon`, git-ignored); add the `neon.ts` function env keys to it by hand. Use `neon` CLI (`neon me`, `neon link`, `neon dev`, `neon deploy`) and the project-scoped Neon MCP server in `.mcp.json`. Neon agent skills live in `.claude/skills/neon*`.
 
 ## Workspace conventions
 
