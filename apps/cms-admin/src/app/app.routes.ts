@@ -18,6 +18,16 @@ export const appRoutes: Route[] = [
         loadComponent: () =>
           import('./dashboard/dashboard').then((m) => m.Dashboard),
       },
+      {
+        path: 'brands',
+        loadComponent: () =>
+          import('./brands/brands-page').then((m) => m.BrandsPage),
+      },
+      {
+        path: 'brands/:brandId',
+        loadComponent: () =>
+          import('./brands/brand-page').then((m) => m.BrandPage),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

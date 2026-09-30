@@ -1,0 +1,139 @@
+<div class="flex flex-col gap-8">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="eyebrow">{{ session.studio()?.name }}</p>
+      <h1 class="mt-1 text-3xl font-medium">Brands</h1>
+    </div>
+    @if (canEdit() && !creating()) {
+    <button hlmBtn type="button" (click)="openForm()">
+      <ng-icon name="lucidePlus" size="16" class="mr-1" />
+      New brand
+    </button>
+    }
+  </div>
+
+  @if (creating()) {
+  <form hlmCard class="flex flex-col gap-4 p-6" (ngSubmit)="create()">
+    <h2 class="text-xl">New brand</h2>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="brand-name">Name</label>
+        <input
+          hlmInput
+          id="brand-name"
+          name="name"
+          required
+          [ngModel]="name"
+          (ngModelChange)="onNameChange($event)"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="brand-slug">Slug</label>
+        <input
+          hlmInput
+          id="brand-slug"
+          name="slug"
+          class="font-mono text-xs"
+          [pattern]="slugPattern"
+          [ngModel]="slug"
+          (ngModelChange)="onSlugChange($event)"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="brand-domains">Domains</label>
+        <input
+          hlmInput
+          id="brand-domains"
+          name="domains"
+          placeholder="brand.example, www.brand.example"
+          [(ngModel)]="domains"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="brand-theme">Theme</label>
+        <select
+          id="brand-theme"
+          name="themeId"
+          class="border-input bg-background h-9 rounded-md border px-3 text-sm"
+          [(ngModel)]="themeId"
+        >
+          <option value="">No theme yet</option>
+          @for (theme of themes(); track theme.id) {
+          <option [value]="theme.id">{{ theme.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    @if (formError(); as message) {
+    <p class="text-destructive text-sm" role="alert">{{ message }}</p>
+    }
+    <div class="flex gap-2">
+      <button hlmBtn type="submit" [disabled]="saving() || !name.trim()">
+        Create brand
+      </button>
+      <button hlmBtn variant="ghost" type="button" (click)="cancel()">
+        Cancel
+      </button>
+    </div>
+  </form>
+  } @if (error(); as message) {
+  <div hlmCard class="border-destructive/40 p-5" role="alert">
+    <p class="font-medium">Couldn't load brands.</p>
+    <p class="text-muted-foreground mt-1 text-sm">{{ message }}</p>
+  </div>
+  } @else if (loading()) {
+  <p class="text-muted-foreground text-sm" aria-busy="true">Loading brands…</p>
+  } @else {
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Brands">
+    @for (brand of brands(); track brand.id) {
+    <a
+      [routerLink]="['/brands', brand.id]"
+      class="border-border hover:border-primary/60 group flex flex-col overflow-hidden rounded-xl border transition-colors"
+    >
+      @if (brand.theme; as theme) {
+      <div
+        [shBrandTheme]="theme"
+        class="bg-background text-foreground flex flex-col gap-3 p-5"
+      >
+        <div class="flex items-center justify-between">
+          <span
+            class="bg-primary size-9 rounded-full"
+            aria-hidden="true"
+          ></span>
+          <span hlmBadge variant="secondary">{{ theme.name }}</span>
+        </div>
+        <p class="font-display text-xl">{{ brand.name }}</p>
+        <div class="flex h-2 overflow-hidden rounded-full" aria-hidden="true">
+          @for (role of roles; track role) {
+          <span
+            class="flex-1"
+            [style.background-color]="theme.colors[role].hex"
+          ></span>
+          }
+        </div>
+      </div>
+      } @else {
+      <div class="bg-muted/40 flex flex-col gap-3 p-5">
+        <span hlmBadge variant="outline" class="self-start">No theme</span>
+        <p class="font-display text-xl">{{ brand.name }}</p>
+      </div>
+      }
+      <div class="flex items-center justify-between px-5 py-3 text-sm">
+        <span class="text-muted-foreground font-mono text-xs"
+          >{{ brand.slug }}</span
+        >
+        <span class="text-muted-foreground flex items-center gap-1">
+          {{ brand.domains.length }} {{ brand.domains.length === 1 ? 'domain' :
+          'domains' }}
+          <ng-icon name="lucideChevronRight" size="14" />
+        </span>
+      </div>
+    </a>
+    } @empty {
+    <p class="text-muted-foreground text-sm">
+      No brands yet. @if (canEdit()) { Create the first one to get started. }
+    </p>
+    }
+  </section>
+  }
+</div>

@@ -23,6 +23,8 @@ export interface BrandSummary {
   readonly id: string;
   readonly slug: string;
   readonly name: string;
+  /** Database id of the assigned theme, for editing. */
+  readonly themeId: string | null;
   /** The brand's stored theme, or `null` when none is assigned yet. */
   readonly theme: ColorTheme | null;
 }

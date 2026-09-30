@@ -109,8 +109,10 @@ describe('App shell interactions', () => {
     const { el } = await mount();
     const soon = el.querySelectorAll('nav [aria-disabled="true"]');
     const links = el.querySelectorAll('nav a');
-    expect(soon.length).toBe(9);
-    expect(links.length).toBe(1);
-    expect(links[0].textContent?.trim()).toBe('Dashboard');
+    expect(soon.length).toBe(8);
+    expect(Array.from(links).map((a) => a.textContent?.trim())).toEqual([
+      'Dashboard',
+      'Brands',
+    ]);
   });
 });

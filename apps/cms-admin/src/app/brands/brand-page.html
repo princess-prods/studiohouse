@@ -1,0 +1,133 @@
+<div class="flex flex-col gap-8">
+  <a
+    routerLink="/brands"
+    class="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+  >
+    <ng-icon name="lucideArrowLeft" size="14" />
+    All brands
+  </a>
+
+  @if (error(); as message) {
+  <div hlmCard class="border-destructive/40 p-5" role="alert">
+    <p class="font-medium">Couldn't load this brand.</p>
+    <p class="text-muted-foreground mt-1 text-sm">{{ message }}</p>
+  </div>
+  } @else if (loading() || !brand()) {
+  <p class="text-muted-foreground text-sm" aria-busy="true">Loading brand…</p>
+  } @else {
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="eyebrow">Brand</p>
+      <h1 class="mt-1 text-3xl font-medium">{{ brand()?.name }}</h1>
+    </div>
+    @if (canDelete()) {
+    <button
+      hlmBtn
+      variant="outline"
+      size="sm"
+      type="button"
+      class="text-destructive"
+      (click)="deleteBrand()"
+    >
+      <ng-icon name="lucideTrash2" size="14" class="mr-1" />
+      Delete brand
+    </button>
+    }
+  </div>
+
+  <form hlmCard class="flex flex-col gap-4 p-6" (ngSubmit)="saveBrand()">
+    <h2 class="text-xl">Details</h2>
+    <fieldset class="grid gap-4 sm:grid-cols-2" [disabled]="!canEdit()">
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="edit-name">Name</label>
+        <input
+          hlmInput
+          id="edit-name"
+          name="name"
+          required
+          [(ngModel)]="name"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="edit-slug">Slug</label>
+        <input
+          hlmInput
+          id="edit-slug"
+          name="slug"
+          class="font-mono text-xs"
+          required
+          [pattern]="slugPattern"
+          [(ngModel)]="slug"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="edit-domains">Domains</label>
+        <input
+          hlmInput
+          id="edit-domains"
+          name="domains"
+          placeholder="brand.example, www.brand.example"
+          [(ngModel)]="domains"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="edit-theme">Theme</label>
+        <select
+          id="edit-theme"
+          name="themeId"
+          class="border-input bg-background h-9 rounded-md border px-3 text-sm"
+          [ngModel]="selectedThemeId()"
+          (ngModelChange)="onThemePick($event)"
+        >
+          <option value="">No theme</option>
+          @for (theme of themes(); track theme.id) {
+          <option [value]="theme.id">{{ theme.name }}</option>
+          } @if (canEdit()) {
+          <option [value]="NEW_THEME">New theme…</option>
+          }
+        </select>
+      </div>
+    </fieldset>
+
+    @if (saveError(); as message) {
+    <p class="text-destructive text-sm" role="alert">{{ message }}</p>
+    } @if (canEdit()) {
+    <div class="flex items-center gap-3">
+      <button
+        hlmBtn
+        type="submit"
+        [disabled]="saving() || !name.trim() || !slug.trim()"
+      >
+        Save brand
+      </button>
+      @if (saved()) {
+      <span class="text-success text-sm" role="status">Saved</span>
+      }
+    </div>
+    }
+  </form>
+
+  @if (selectedTheme() || creatingTheme()) {
+  <section hlmCard class="flex flex-col gap-4 p-6" aria-label="Theme">
+    <div>
+      <p class="eyebrow">Theme</p>
+      <h2 class="text-xl">
+        {{ creatingTheme() ? 'New theme' : selectedTheme()?.name }}
+      </h2>
+      @if (creatingTheme()) {
+      <p class="text-muted-foreground text-sm">
+        Starts from the demo palette. It is assigned to this brand when created.
+      </p>
+      }
+    </div>
+    <hlm-separator />
+    <cms-theme-editor
+      [theme]="selectedTheme()"
+      [canEdit]="canEdit()"
+      [busy]="themeSaving()"
+      [error]="themeError()"
+      (save)="saveTheme($event)"
+    />
+  </section>
+  } }
+</div>
