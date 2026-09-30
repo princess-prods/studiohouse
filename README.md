@@ -1,5 +1,8 @@
 # Studiohouse
 
+[![CI](https://github.com/princess-prods/studiohouse/actions/workflows/ci.yml/badge.svg)](https://github.com/princess-prods/studiohouse/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/princess-prods/studiohouse/graph/badge.svg)](https://codecov.io/gh/princess-prods/studiohouse)
+
 Nx monorepo for a multi-tenant content platform for adult production studios, built so
 it can be offered as SaaS. Princess Productions is the first studio. It contains the internal CMS used to update and monitor every brand, the white-label
 apps that serve each brand, and the Neon Function API that connects them to Lakebase
@@ -77,6 +80,19 @@ npx nx g @nx/angular:component <name> --project=<project>
 
 After adding a new `scope:` tag, add its dependency constraint to
 [eslint.config.mjs](./eslint.config.mjs).
+
+## Coverage
+
+Every project runs Vitest with v8 coverage. The local target is 100% line coverage per
+project; Codecov enforces the floor in `codecov.yml` on pull requests.
+
+```bash
+npx nx run-many -t test --coverage          # reports in coverage/<project>/
+npx nx affected -t test --coverage --base=origin/main
+```
+
+The `coverage-gate` hook in `.claude/settings.json` runs when a PR is created, blocks
+below the floor and reports remaining gaps; the `/coverage` skill describes how to close them.
 
 ## CI
 

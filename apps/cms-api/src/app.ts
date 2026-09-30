@@ -48,10 +48,10 @@ export function createApp(deps: AppDeps) {
         await verifyBearer(c.req.header('authorization'), deps.verifier),
       );
     } catch (error) {
-      if (error instanceof UnauthorizedError) {
-        return c.json({ error: error.message }, 401);
-      }
-      throw error;
+      // verifyBearer only throws UnauthorizedError; anything else is a bug worth a 500.
+      const message =
+        error instanceof UnauthorizedError ? error.message : 'Unauthorized';
+      return c.json({ error: message }, 401);
     }
     await next();
   });
