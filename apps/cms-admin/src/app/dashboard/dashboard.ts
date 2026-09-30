@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideChevronRight,
@@ -7,15 +7,10 @@ import {
   lucidePlay,
   lucideUsers,
 } from '@ng-icons/lucide';
-import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
-import {
-  BrandThemeDirective,
-  COLOR_ROLES,
-  ColorTheme,
-  PRINCESS_PRODUCTIONS_THEME,
-} from '@studiohouse/ui';
+import { BrandThemeDirective, COLOR_ROLES } from '@studiohouse/ui';
+import { SessionService } from '../core/session.service';
 
 interface Stat {
   readonly label: string;
@@ -23,20 +18,8 @@ interface Stat {
   readonly icon: string;
 }
 
-interface BrandSummary {
-  readonly slug: string;
-  readonly name: string;
-  readonly theme: ColorTheme;
-}
-
 @Component({
-  imports: [
-    NgIcon,
-    HlmBadgeImports,
-    HlmButtonImports,
-    HlmCardImports,
-    BrandThemeDirective,
-  ],
+  imports: [NgIcon, HlmButtonImports, HlmCardImports, BrandThemeDirective],
   providers: [
     provideIcons({
       lucideChevronRight,
@@ -50,27 +33,18 @@ interface BrandSummary {
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
+  protected readonly session = inject(SessionService);
   protected readonly roles = COLOR_ROLES;
 
-  // Placeholder figures until the API exists.
-  protected readonly stats: readonly Stat[] = [
-    { label: 'Brands', value: '2', icon: 'lucideLayers' },
+  // Content, performer and view counts arrive with their features.
+  protected readonly stats = computed<readonly Stat[]>(() => [
+    {
+      label: 'Brands',
+      value: String(this.session.brands().length),
+      icon: 'lucideLayers',
+    },
     { label: 'Videos', value: '0', icon: 'lucidePlay' },
     { label: 'Performers', value: '0', icon: 'lucideUsers' },
     { label: 'Total views', value: '0', icon: 'lucideEye' },
-  ];
-
-  // Mirrors the seed in @studiohouse/db until brands are served by the API.
-  protected readonly brands: readonly BrandSummary[] = [
-    {
-      slug: 'princess-productions',
-      name: 'Princess Productions',
-      theme: PRINCESS_PRODUCTIONS_THEME,
-    },
-    {
-      slug: 'devinella',
-      name: 'Devinella',
-      theme: PRINCESS_PRODUCTIONS_THEME,
-    },
-  ];
+  ]);
 }

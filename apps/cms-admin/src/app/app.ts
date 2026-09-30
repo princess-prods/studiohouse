@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, DOCUMENT, computed, inject, signal } from '@angular/core';
+import { Component, DOCUMENT, computed, inject } from '@angular/core';
 import {
   Router,
   RouterLink,
@@ -27,6 +27,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
 import { AuthService } from '@studiohouse/auth';
+import { SessionService } from './core/session.service';
 
 interface NavItem {
   readonly label: string;
@@ -73,8 +74,7 @@ export class App {
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
   protected readonly auth = inject(AuthService);
-
-  protected readonly studioName = signal('Princess Productions');
+  protected readonly session = inject(SessionService);
 
   /** Two-letter avatar from the user's name or email. */
   protected readonly initials = computed(() => {
@@ -132,8 +132,13 @@ export class App {
     this.document.documentElement.classList.toggle('dark');
   }
 
+  protected selectStudio(event: Event): void {
+    this.session.selectStudio((event.target as HTMLSelectElement).value);
+  }
+
   protected async signOut(): Promise<void> {
     await this.auth.signOut();
+    this.session.clear();
     await this.router.navigateByUrl('/sign-in');
   }
 }

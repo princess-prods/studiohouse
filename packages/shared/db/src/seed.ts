@@ -1,6 +1,7 @@
 /**
- * Seeds the Princess Productions studio, its house theme and its brands.
- * Idempotent: re-running updates names and colours but never duplicates rows.
+ * Seeds a demo studio with a theme and two brands so a fresh branch has
+ * something to show. Idempotent: re-running updates names and colours but
+ * never duplicates rows. Real studios are created through the CMS.
  *
  *   npx nx run db:seed          (reads DATABASE_URL from .env.local)
  */
@@ -8,71 +9,71 @@ import { eq } from 'drizzle-orm';
 import { createDb } from './lib/client';
 import { brands, colorThemes, studios, themeColors } from './lib/schema';
 
-// Mirrors PRINCESS_PRODUCTIONS_THEME in @studiohouse/ui.
-const HOUSE_PALETTE = [
+const STUDIO = { slug: 'demo-studio', name: 'Demo Studio' };
+
+// Mirrors DEMO_BRAND_THEME in @studiohouse/ui.
+const DEMO_PALETTE = [
   {
     role: 'primary',
-    name: 'Princess Pink',
-    description: 'Vivid hot pink',
-    hex: '#EE2762',
-    purpose: 'Primary brand color',
+    name: 'Signal Blue',
+    description: 'Bright cobalt',
+    hex: '#2563EB',
+    purpose: 'Primary brand colour',
   },
   {
     role: 'ink',
-    name: 'After Dark',
-    description: 'Near-black charcoal',
-    hex: '#181518',
-    purpose: 'Backgrounds, typography',
+    name: 'Graphite',
+    description: 'Near-black slate',
+    hex: '#0F172A',
+    purpose: 'Backgrounds in dark mode, typography',
   },
   {
     role: 'paper',
-    name: 'Champagne',
-    description: 'Warm cream',
-    hex: '#F5E7D5',
-    purpose: 'Softer alternative to stark white',
+    name: 'Linen',
+    description: 'Cool off-white',
+    hex: '#F8FAFC',
+    purpose: 'Page background in light mode',
   },
   {
     role: 'secondary',
-    name: 'Boudoir Red',
-    description: 'Deep wine/red',
-    hex: '#861D3B',
+    name: 'Violet',
+    description: 'Deep violet',
+    hex: '#7C3AED',
     purpose: 'Secondary accent',
   },
   {
     role: 'tint',
-    name: 'Blush',
-    description: 'Pale dusty pink',
-    hex: '#F4B5C5',
-    purpose: 'Backgrounds and secondary graphics',
+    name: 'Mist',
+    description: 'Pale blue-grey',
+    hex: '#CBD5E1',
+    purpose: 'Muted text, borders, secondary graphics',
   },
 ] as const;
+
+const BRANDS = [
+  { slug: 'brand-one', name: 'Brand One', domains: ['brand-one.example'] },
+  { slug: 'brand-two', name: 'Brand Two', domains: ['brand-two.example'] },
+];
 
 async function main() {
   const db = createDb();
 
   const [studio] = await db
     .insert(studios)
-    .values({ slug: 'princess-productions', name: 'Princess Productions' })
-    .onConflictDoUpdate({
-      target: studios.slug,
-      set: { name: 'Princess Productions' },
-    })
+    .values(STUDIO)
+    .onConflictDoUpdate({ target: studios.slug, set: { name: STUDIO.name } })
     .returning();
 
   const [theme] = await db
     .insert(colorThemes)
-    .values({
-      studioId: studio.id,
-      slug: 'princess-productions',
-      name: 'Princess Productions',
-    })
+    .values({ studioId: studio.id, slug: 'demo-brand', name: 'Demo Brand' })
     .onConflictDoUpdate({
       target: [colorThemes.studioId, colorThemes.slug],
-      set: { name: 'Princess Productions' },
+      set: { name: 'Demo Brand' },
     })
     .returning();
 
-  for (const color of HOUSE_PALETTE) {
+  for (const color of DEMO_PALETTE) {
     await db
       .insert(themeColors)
       .values({ themeId: theme.id, ...color })
@@ -87,15 +88,7 @@ async function main() {
       });
   }
 
-  const brandRows = [
-    {
-      slug: 'princess-productions',
-      name: 'Princess Productions',
-      domains: ['princessproductions.com'],
-    },
-    { slug: 'devinella', name: 'Devinella', domains: ['devinella.com'] },
-  ];
-  for (const brand of brandRows) {
+  for (const brand of BRANDS) {
     await db
       .insert(brands)
       .values({ studioId: studio.id, themeId: theme.id, ...brand })

@@ -40,7 +40,24 @@
 
     <div class="border-sidebar-border border-t px-5 py-4">
       <p class="eyebrow">Studio</p>
-      <p class="mt-1 text-sm font-medium">{{ studioName() }}</p>
+      @if (session.canSwitchStudio()) {
+      <select
+        class="bg-sidebar border-sidebar-border mt-1 w-full rounded-md border px-2 py-1 text-sm font-medium"
+        aria-label="Switch studio"
+        [value]="session.studio()?.id"
+        (change)="selectStudio($event)"
+      >
+        @for (m of session.memberships(); track m.studio.id) {
+        <option [value]="m.studio.id">{{ m.studio.name }}</option>
+        }
+      </select>
+      } @else {
+      <p class="mt-1 text-sm font-medium">
+        {{ session.studio()?.name ?? 'No studio' }}
+      </p>
+      } @if (session.role(); as role) {
+      <p class="text-muted-foreground mt-0.5 text-xs capitalize">{{ role }}</p>
+      }
     </div>
   </aside>
 

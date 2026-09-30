@@ -2,6 +2,7 @@ import { Route } from '@angular/router';
 import { authGuard, signedOutGuard } from '@studiohouse/auth';
 import { appConfig } from './app.config';
 import { appRoutes } from './app.routes';
+import { sessionGuard } from './core/session.guard';
 import { Dashboard } from './dashboard/dashboard';
 import { SignIn } from './sign-in/sign-in';
 
@@ -20,7 +21,7 @@ describe('appRoutes', () => {
 
   it('guards the shell and lazy-loads the dashboard', async () => {
     const shell = route('');
-    expect(shell.canActivate).toEqual([authGuard]);
+    expect(shell.canActivate).toEqual([authGuard, sessionGuard]);
     const dashboard = route('', shell.children);
     expect(dashboard.pathMatch).toBe('full');
     await expect(dashboard.loadComponent?.()).resolves.toBe(Dashboard);

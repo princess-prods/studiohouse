@@ -29,7 +29,6 @@ function client(overrides: Partial<NeonAuthClient> = {}): NeonAuthClient {
         ? { user: { id: 'u', email: 'o@x.test', name: 'O' } }
         : null,
     }),
-    token: async () => ({ data: { token: 't' } }),
     ...overrides,
   };
 }

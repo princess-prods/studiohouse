@@ -12,7 +12,12 @@ import { Router, UrlTree, provideRouter } from '@angular/router';
 import { provideNeonAuth } from './auth.config';
 import { authGuard, signedOutGuard } from './auth.guard';
 import { authInterceptor } from './auth.interceptor';
-import { AuthService, NEON_AUTH_CLIENT, NeonAuthClient } from './auth.service';
+import {
+  AUTH_FETCH,
+  AuthService,
+  NEON_AUTH_CLIENT,
+  NeonAuthClient,
+} from './auth.service';
 
 const user = { id: 'user_1', email: 'owner@example.com', name: 'Owner' };
 
@@ -40,8 +45,6 @@ function fakeClient(signedIn: boolean): NeonAuthClient & { calls: string[] } {
       session = false;
     },
     getSession: async () => ({ data: session ? { user } : null, error: null }),
-    token: async () =>
-      session ? { data: { token: 'jwt-123' } } : { data: null, error: {} },
   };
 }
 
@@ -54,6 +57,15 @@ function setup(signedIn: boolean) {
       provideHttpClient(withInterceptors([authInterceptor])),
       provideHttpClientTesting(),
       { provide: NEON_AUTH_CLIENT, useValue: client },
+      {
+        provide: AUTH_FETCH,
+        useValue: async (url: string) =>
+          signedIn && url.endsWith('/token')
+            ? new Response(JSON.stringify({ token: 'jwt-123' }), {
+                status: 200,
+              })
+            : new Response('', { status: 401 }),
+      },
     ],
   });
   return { client, auth: TestBed.inject(AuthService) };

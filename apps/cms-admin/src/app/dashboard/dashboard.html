@@ -4,8 +4,36 @@
     <h1 class="mt-1 text-3xl font-medium">Dashboard</h1>
   </div>
 
+  @switch (session.status()) { @case ('error') {
+  <div
+    hlmCard
+    class="border-destructive/40 flex flex-col gap-3 px-5 py-4"
+    role="alert"
+  >
+    <p class="font-medium">Couldn't load your studio.</p>
+    <p class="text-muted-foreground text-sm">{{ session.error() }}</p>
+    <div>
+      <button
+        hlmBtn
+        variant="outline"
+        size="sm"
+        type="button"
+        (click)="session.refresh()"
+      >
+        Try again
+      </button>
+    </div>
+  </div>
+  } @case ('ready') { @if (!session.membership()) {
+  <div hlmCard class="px-5 py-4">
+    <p class="font-medium">You're not a member of a studio yet.</p>
+    <p class="text-muted-foreground mt-1 text-sm">
+      Ask your studio owner to add {{ session.user()?.email }} as a member.
+    </p>
+  </div>
+  } @else {
   <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Stats">
-    @for (stat of stats; track stat.label) {
+    @for (stat of stats(); track stat.label) {
     <div hlmCard class="flex flex-row items-center gap-4 px-5 py-4">
       <span
         class="bg-accent text-accent-foreground flex size-11 shrink-0 items-center justify-center rounded-xl"
@@ -38,13 +66,17 @@
     <div hlmCard>
       <div hlmCardHeader>
         <p class="eyebrow">Brand themes</p>
-        <h2 hlmCardTitle class="text-xl">{{ brands.length }} brands</h2>
+        <h2 hlmCardTitle class="text-xl">
+          {{ session.brands().length }} {{ session.brands().length === 1 ?
+          'brand' : 'brands' }}
+        </h2>
       </div>
       <div hlmCardContent class="flex flex-col gap-3">
-        @for (brand of brands; track brand.slug) {
-        <!-- Each preview is rendered in its own brand's colours, inside the Studiohouse shell. -->
+        @for (brand of session.brands(); track brand.id) { @if (brand.theme; as
+        theme) {
+        <!-- Rendered in the brand's own colours, inside the Studiohouse shell. -->
         <article
-          [shBrandTheme]="brand.theme"
+          [shBrandTheme]="theme"
           class="bg-background text-foreground border-border overflow-hidden rounded-lg border"
         >
           <div class="flex items-center justify-between gap-3 px-4 py-3">
@@ -55,9 +87,7 @@
               ></span>
               <div>
                 <p class="text-sm font-medium">{{ brand.name }}</p>
-                <p class="text-muted-foreground text-xs">
-                  {{ brand.theme.name }}
-                </p>
+                <p class="text-muted-foreground text-xs">{{ theme.name }}</p>
               </div>
             </div>
             <button
@@ -74,11 +104,24 @@
             @for (role of roles; track role) {
             <span
               class="flex-1"
-              [style.background-color]="brand.theme.colors[role].hex"
+              [style.background-color]="theme.colors[role].hex"
             ></span>
             }
           </div>
         </article>
+        } @else {
+        <article
+          class="border-border flex items-center justify-between gap-3 rounded-lg border border-dashed px-4 py-3"
+        >
+          <div>
+            <p class="text-sm font-medium">{{ brand.name }}</p>
+            <p class="text-muted-foreground text-xs">No theme yet</p>
+          </div>
+        </article>
+        } } @empty {
+        <p class="text-muted-foreground text-sm">
+          No brands yet. Create one to get started.
+        </p>
         }
       </div>
       <div hlmCardFooter>
@@ -88,4 +131,9 @@
       </div>
     </div>
   </section>
+  } } @default {
+  <p class="text-muted-foreground text-sm" aria-busy="true">
+    Loading your studio…
+  </p>
+  } }
 </div>

@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/princess-prods/studiohouse/graph/badge.svg)](https://codecov.io/gh/princess-prods/studiohouse)
 
 Nx monorepo for a multi-tenant content platform for adult production studios, built so
-it can be offered as SaaS. Princess Productions is the first studio. It contains the internal CMS used to update and monitor every brand, the white-label
+it can be offered as SaaS. It contains the internal CMS used to update and monitor every brand, the white-label
 apps that serve each brand, and the Neon Function API that connects them to Lakebase
 Postgres and Managed Auth on [Neon](https://neon.com).
 

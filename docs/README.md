@@ -1,7 +1,7 @@
 # Studiohouse — Documentation
 
 This monorepo holds a multi-tenant content platform for adult production studios.
-Princess Productions is the first studio; the platform is designed so other studios
+Each production company is a studio; the platform is designed so studios
 can be onboarded as a SaaS offering. Start here:
 
 | Doc                                  | What it covers                                                             |
@@ -13,8 +13,8 @@ can be onboarded as a SaaS offering. Start here:
 
 ## Vocabulary
 
-- **Studio** — the tenant and highest unit of organisation, e.g. Princess Productions. Everything in the system belongs to exactly one studio.
-- **Brand** — a consumer-facing identity owned by a studio: a name, a look, one or more domains, and a content lane (e.g. Princess Productions POV, Devinella). Every piece of content belongs to exactly one brand.
+- **Studio** — the tenant and highest unit of organisation, e.g. Demo Studio. Everything in the system belongs to exactly one studio.
+- **Brand** — a consumer-facing identity owned by a studio: a name, a look, one or more domains, and a content lane (e.g. Brand One, Brand Two). Every piece of content belongs to exactly one brand.
 - **User** — a global identity, one row per person, issued by the auth provider.
 - **Membership** — links a user to a studio with a role (owner, admin, editor, viewer). A user with one membership lands in that studio automatically at login.
 - **Color theme** — a named five-colour palette owned by a studio and assigned to brands; switchable at runtime.

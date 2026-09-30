@@ -19,7 +19,7 @@ Drizzle schema, migrations and Neon client for the whole workspace.
 npx nx run db:generate   # write a new SQL migration from schema changes
 npx nx run db:migrate    # apply migrations to DATABASE_URL_UNPOOLED
 npx nx run db:push       # dev only: sync schema without a migration file
-npx nx run db:seed       # seed Princess Productions, its theme and brands
+npx nx run db:seed       # seed a demo studio, its theme and two brands
 npx nx run db:studio     # open Drizzle Studio
 ```
 
