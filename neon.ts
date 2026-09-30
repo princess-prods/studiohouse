@@ -1,8 +1,13 @@
 import { defineConfig } from '@neon/config/v1';
 
 /**
- * Neon infrastructure as code. Applied to the linked branch with
- * `neon deploy --env .env.local`; served locally with `neon dev`.
+ * Neon infrastructure as code. Applied to the linked branch (see `.neon`) with
+ *
+ *   neon deploy --env .env.local
+ *
+ * The `--env` file is required: the `env` block below reads `process.env`, and a
+ * plain `neon deploy` fails fast rather than uploading empty values. Served
+ * locally with `neon dev` after exporting the same file into the shell.
  *
  * - `auth: true`     Managed Better Auth on every branch (users live in `neon_auth`).
  * - `functions`      Neon Functions, keyed by slug (permanent, ^[a-z0-9]{1,20}$).
