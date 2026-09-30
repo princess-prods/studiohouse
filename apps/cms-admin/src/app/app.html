@@ -1,3 +1,4 @@
+@if (auth.isSignedIn()) {
 <div class="flex min-h-screen">
   <!-- Sidebar -->
   <aside
@@ -83,9 +84,20 @@
         </button>
         <span
           class="bg-brand-secondary text-brand-paper ml-2 flex size-8 items-center justify-center rounded-full text-xs font-semibold"
-          aria-label="Account"
-          >PP</span
+          [attr.aria-label]="auth.user()?.email"
+          [title]="auth.user()?.email"
+          >{{ initials() }}</span
         >
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          type="button"
+          aria-label="Sign out"
+          (click)="signOut()"
+        >
+          <ng-icon name="lucideLogOut" size="18" />
+        </button>
       </div>
     </header>
 
@@ -94,6 +106,9 @@
     </main>
   </div>
 </div>
+} @else {
+<router-outlet />
+}
 
 <ng-template #navLink let-item>
   @if (item.soon) {

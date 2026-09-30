@@ -1,0 +1,75 @@
+<div class="flex min-h-screen items-center justify-center p-6">
+  <section hlmCard class="w-full max-w-sm">
+    <div hlmCardHeader class="items-center text-center">
+      <span
+        class="bg-brand-primary text-brand-ink font-display mb-2 flex size-11 items-center justify-center rounded-xl text-xl font-semibold"
+        aria-hidden="true"
+        >S</span
+      >
+      <p class="eyebrow">Studiohouse</p>
+      <h1 hlmCardTitle class="text-2xl">
+        {{ mode() === 'sign-in' ? 'Welcome back' : 'Create your account' }}
+      </h1>
+      <p hlmCardDescription>
+        {{ mode() === 'sign-in' ? 'Sign in to manage your studio.' : 'Your
+        studio owner will grant access after you sign up.' }}
+      </p>
+    </div>
+
+    <form hlmCardContent class="flex flex-col gap-4" (ngSubmit)="submit()">
+      @if (mode() === 'sign-up') {
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="name">Name</label>
+        <input
+          hlmInput
+          id="name"
+          name="name"
+          autocomplete="name"
+          required
+          [(ngModel)]="name"
+        />
+      </div>
+      }
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="email">Email</label>
+        <input
+          hlmInput
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          [(ngModel)]="email"
+        />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="password">Password</label>
+        <input
+          hlmInput
+          id="password"
+          name="password"
+          type="password"
+          [autocomplete]="mode() === 'sign-in' ? 'current-password' : 'new-password'"
+          minlength="8"
+          required
+          [(ngModel)]="password"
+        />
+      </div>
+
+      @if (error(); as message) {
+      <p class="text-destructive text-sm" role="alert">{{ message }}</p>
+      }
+
+      <button hlmBtn type="submit" class="w-full" [disabled]="busy()">
+        {{ mode() === 'sign-in' ? 'Sign in' : 'Sign up' }}
+      </button>
+    </form>
+
+    <div hlmCardFooter class="justify-center">
+      <button hlmBtn variant="link" type="button" (click)="toggleMode()">
+        {{ mode() === 'sign-in' ? 'Need an account? Sign up' : 'Already have an
+        account? Sign in' }}
+      </button>
+    </div>
+  </section>
+</div>

@@ -1,51 +1,80 @@
-# Backend functions
+# Backend: Neon Functions
 
-## Hosting: Vercel Functions, connected to Neon
+## Hosting
 
-Backend functions are deployed as **Vercel Functions**. Neon hosts the Postgres
-database; the two are linked through the Neon ↔ Vercel integration, which is set up and
-managed from the Neon dashboard (Integrations → Vercel). The integration:
+The API is a **Neon Function**: a long-running serverless Hono app that runs next to
+the database. It is declared in the root [`neon.ts`](../neon.ts) under `functions.cmsapi`
+and lives in `apps/cms-api`. Functions are branch-scoped: `dev` and `production` each
+run their own deployment at their own URL, with that branch's `DATABASE_URL` and
+Managed Auth injected at runtime.
 
-- injects `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` into the Vercel project's environment for production, preview and development;
-- creates a Neon branch for every Vercel preview deployment and removes it when the deployment is deleted;
-- points production deployments at the `main` branch.
+Neon Auth is also declared there (`auth: true`), so every branch has an isolated auth
+environment with users in the `neon_auth` schema.
 
-Pull those variables locally with:
+## Commands
 
 ```bash
-vercel env pull .env.local
+neon dev --source apps/cms-api/src/index.ts --port 3000   # local, hot reload, branch env injected
+neon deploy --env .env.local                               # apply neon.ts to the linked branch
+neon functions get cmsapi                                  # invocation_url for the linked branch
+neon config plan                                           # dry-run diff before deploy
 ```
 
-## Shape of a function
+`neon dev` and `neon deploy` evaluate `neon.ts`, which reads the `env` block from
+`process.env`. Keep `ALLOWED_ORIGINS`, `BOOTSTRAP_OWNER_EMAIL` and `BOOTSTRAP_STUDIO_SLUG`
+in `.env.local` (see `.env.example`) and export them before `neon dev`.
+
+## Authentication
+
+Sign-in happens in the browser against Managed Auth (`@studiohouse/auth`). To call the
+API, the client asks Neon Auth for a short-lived JWT (`authClient.token()`, EdDSA,
+about 15 minutes) and sends it as `Authorization: Bearer`. The Function verifies it with
+`jose` against the branch's `NEON_AUTH_JWKS_URL` and checks `iss` and `aud` equal the
+auth host origin (`NEON_AUTH_BASE_URL` without its path). No session cookie ever reaches the API, so the CMS and the API
+can live on different hosts.
+
+Every route except `/health` sits behind that check. A valid token is identity, not
+permission: handlers then resolve the caller's studio memberships and enforce
+authorization per resource.
+
+## Shape
 
 ```
-apps/cms-api/               [scope:api]   (planned)
-  api/<route>.ts            Vercel Function entry points (thin; import from src/)
-  src/
-    handlers/<name>.ts      one exported handler per route, framework-agnostic
-    lib/db.ts               creates the Neon client from DATABASE_URL
-    lib/brand.ts           resolves and validates brand_id from the request
+neon.ts                     infrastructure as code: auth + functions
+apps/cms-api/
+  src/index.ts              entry: pg pool at module scope, env wiring, default export
+  src/app.ts                createApp(deps): Hono app, CORS, bearer middleware, routes
+  src/lib/verify-token.ts   JWKS verification, VerifiedUser
+  src/lib/me.ts             GET /me: upsert user, memberships + brands, first-run bootstrap
 ```
 
-Keep the Vercel-specific entry points thin so handlers stay unit-testable and portable.
-Use `@neondatabase/serverless` for queries (HTTP driver for one-shot queries, WebSocket
-driver when a transaction is needed).
+`createApp` takes explicit dependencies so tests inject a local signing key and a fake
+database. Handlers query through `@studiohouse/db` with the pooled node-postgres client
+(`createPooledDb`), never the serverless HTTP driver, because an isolate is reused across
+many requests.
 
-Every handler:
+## Routes
 
-1. Resolves the caller's identity and the target `brand_id`.
-2. Rejects the request if the caller is not allowed to act on that brand.
-3. Runs queries through `packages/shared/db`, always filtered by `brand_id`.
+| Route     | Auth   | Returns                                                                   |
+| --------- | ------ | ------------------------------------------------------------------------- |
+| `/health` | none   | `{ ok: true }`                                                            |
+| `/me`     | bearer | The caller, and every studio they belong to with its role and its brands. |
 
-Because the only environment-specific input is `DATABASE_URL`, the same handler runs
-unchanged against the dev, preview and prod branches. See [database.md](./database.md).
+## First-run bootstrap
 
-## Deploy and migrations
+A fresh database has a studio but no members. When `BOOTSTRAP_OWNER_EMAIL` matches the
+verified email of a caller with no memberships, `/me` makes them **owner** of
+`BOOTSTRAP_STUDIO_SLUG`. Clear both variables and redeploy once the owner exists.
 
-- Vercel builds from this repo; the Nx build for `cms-api` produces the `api/` directory Vercel deploys.
-- Migrations run in the Vercel build step (or a preceding GitHub Action) against the branch the deployment targets, using `DATABASE_URL_UNPOOLED`.
+## Local development
+
+- The Angular dev server proxies `/api/*` to `http://localhost:3000` (`apps/cms-admin/proxy.conf.json`),
+  so the browser sees one origin and CORS is not involved.
+- In production the CMS calls the Function's invocation URL directly; `ALLOWED_ORIGINS`
+  must list the CMS origin, and the origin must be a Neon Auth trusted domain.
 
 ## Testing
 
-- **Unit tests** (Vitest) mock the db client.
-- **Integration tests** run against a real Neon branch. In CI that is the preview branch the integration created for the deployment; locally it is `dev`. They are gated behind `DATABASE_URL` being set so `nx test` still passes without one.
+- **Unit** (Vitest): tokens signed with a generated EdDSA key and verified through a local
+  JWKS; Hono routes exercised with `app.request()`.
+- **Integration**: run `neon dev` against the `dev` branch and drive the CMS.

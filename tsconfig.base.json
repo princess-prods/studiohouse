@@ -36,7 +36,9 @@
       ],
       "@spartan-ng/helm/separator": [
         "./packages/shared/ui-helm/separator/src/index.ts"
-      ]
+      ],
+      "@studiohouse/auth": ["./packages/shared/auth/src/index.ts"],
+      "@studiohouse/cms-api": ["./apps/cms-api/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

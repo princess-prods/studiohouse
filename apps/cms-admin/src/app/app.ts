@@ -1,6 +1,11 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, DOCUMENT, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, DOCUMENT, computed, inject, signal } from '@angular/core';
+import {
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideBell,
@@ -10,6 +15,7 @@ import {
   lucideFilm,
   lucideHouse,
   lucideLayers,
+  lucideLogOut,
   lucideMessageSquare,
   lucideSearch,
   lucideSettings,
@@ -20,6 +26,7 @@ import {
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
+import { AuthService } from '@studiohouse/auth';
 
 interface NavItem {
   readonly label: string;
@@ -49,6 +56,7 @@ interface NavItem {
       lucideFilm,
       lucideHouse,
       lucideLayers,
+      lucideLogOut,
       lucideMessageSquare,
       lucideSearch,
       lucideSettings,
@@ -63,8 +71,21 @@ interface NavItem {
 })
 export class App {
   private readonly document = inject(DOCUMENT);
+  private readonly router = inject(Router);
+  protected readonly auth = inject(AuthService);
 
   protected readonly studioName = signal('Princess Productions');
+
+  /** Two-letter avatar from the user's name or email. */
+  protected readonly initials = computed(() => {
+    const user = this.auth.user();
+    const source = user?.name || user?.email || '';
+    const parts = source.split(/[\s@._-]+/).filter(Boolean);
+    return parts
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase() ?? '')
+      .join('');
+  });
 
   protected readonly primaryNav: readonly NavItem[] = [
     { label: 'Dashboard', icon: 'lucideHouse', path: '/' },
@@ -109,5 +130,10 @@ export class App {
 
   protected toggleScheme(): void {
     this.document.documentElement.classList.toggle('dark');
+  }
+
+  protected async signOut(): Promise<void> {
+    await this.auth.signOut();
+    await this.router.navigateByUrl('/sign-in');
   }
 }

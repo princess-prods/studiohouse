@@ -36,7 +36,13 @@
               "maximumError": "8kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "fileReplacements": [
+            {
+              "replace": "apps/cms-admin/src/environments/environment.ts",
+              "with": "apps/cms-admin/src/environments/environment.production.ts"
+            }
+          ]
         },
         "development": {
           "optimization": false,
@@ -56,6 +62,9 @@
         "development": {
           "buildTarget": "cms-admin:build:development"
         }
+      },
+      "options": {
+        "proxyConfig": "apps/cms-admin/proxy.conf.json"
       }
     },
     "lint": {
